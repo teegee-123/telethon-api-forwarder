@@ -51,7 +51,7 @@ async def applyAdminToUser(client, user, channelId):
    await client.edit_admin(add_admins=True, entity=channelId, user = user, post_messages = True, edit_messages = True)
 
 async def create_feed(client , feed_name, source_id): 
-   newChannelID = feed_exists(client, feed_name)
+   newChannelID = await feed_exists(client, feed_name)
    if(newChannelID == 0):
       createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name} {source_id}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
