@@ -78,7 +78,7 @@ def getCodeFromFile(delay = 15):
 
 async def main():
    client = TelegramClient(session, api_id, api_hash)
-   await client.start(phone=phone, code_callback= lambda x: getCodeFromFile(15))
+   await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
    await create_feeds(client)
    await client.run_until_disconnected()
 
