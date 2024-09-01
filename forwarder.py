@@ -17,8 +17,9 @@ buy_signals = int(os.environ.get("BUYSIGNALSGROUP"))
 
 
 feeds = json.loads(os.environ.get("FEEDS"))
-feed_users = json.loads(os.environ.get("FEED_USERS")) # add safe analyzer and the bot api user
+feed_users = list(map(lambda x: x['users'], feeds)); # add safe analyzer and the bot api user
 print(feeds)
+print(feed_users)
 
 
 def getIdFromMessage(message):
@@ -62,8 +63,8 @@ async def create_feeds(client):
       await client.send_message(trade_bot, event.message)
 
 
-def getCodeFromFile(): 
-   time.sleep(15)
+async def getCodeFromFile(): 
+   await time.sleep(15)
    with open(code_file, "r", encoding="utf-8") as myfile:
       code = myfile.read()
       print(code)
