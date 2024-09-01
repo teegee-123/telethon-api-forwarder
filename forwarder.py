@@ -60,8 +60,9 @@ async def create_feed(client , feed_name, source_id):
    users = await client.get_participants(newChannelID)
    print(users)
    # TODO FOR ALL USERS
-   await client.edit_admin(add_admins=True, entity=newChannelID, user = users[1], post_messages = True, edit_messages = True)
-   await client.edit_admin(add_admins=True, entity=newChannelID, user = users[2], post_messages = True, edit_messages = True)
+   async for u in users:
+      if(u.bot):
+         await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
    return newChannelID
 
 # creates a group with scraper bot and safe bot as participants and for
