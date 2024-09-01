@@ -60,7 +60,7 @@ async def create_feed(client , feed_name, source_id):
    users = await client.get_participants(newChannelID)
    print(users)
    # TODO FOR ALL USERS
-   async for u in users:
+   for u in users:
       if(u.bot):
          await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
    return newChannelID
