@@ -43,7 +43,6 @@ def format_id(id):
 
 async def feed_exists(client, feed_name):
    async for dialog in client.iter_dialogs():
-      print(dialog.title)
       if(dialog.title is not None and dialog.title == f'Feed {feed_name}'):
          return format_id(dialog.id)
    return 0
@@ -61,9 +60,9 @@ async def create_feed(client , feed_name, source_id):
    else:
       print(f'using existing group {newChannelID}')
    users = await client.get_participants(newChannelID)
-   print(users)
    for u in users:
       if(u.bot):
+         print(f'adding rights for {u.username}' )
          await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
    return newChannelID
 
@@ -80,12 +79,14 @@ async def create_feeds(client):
    sources = list(map(lambda x: x['id'], feeds))
    @client.on(events.NewMessage(chats=sources))
    async def handler(event):
+      print("Forward to feed group")
       source_id = getIdFromMessage(event.message)
       destination_id = list(filter(lambda x: x['id'] == source_id, feeds))[0]['channel_id']
       await client.send_message(destination_id, event.message)
       
    @client.on(events.NewMessage(chats=[buy_signals]))
    async def handler(event):         
+      print("Forward to trade bot")
       await client.send_message(trade_bot, event.message)
 
 
