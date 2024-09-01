@@ -16,5 +16,5 @@ async def set_code(code: int):
      return code
 
 @app.get("/run")
-async def set_code():
-     await main()
+def run():
+     main()
