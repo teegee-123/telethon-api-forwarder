@@ -38,9 +38,7 @@ def getIdFromMessage(message):
 async def create_feed(client , feed_name):      
    createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name}' ,megagroup=True))   
    newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]     
-   print("NEW CHANNEL ID")
-   print(newChannelID)
-   await client(InviteToChannelRequest(channel=newChannelID, users=feed_users))
+   await client(InviteToChannelRequest(channel=newChannelID, users=get_feed_users(feed_name)))
 
    users = await client.get_participants(newChannelID)
    # TODO FOR ALL USERS
@@ -78,10 +76,13 @@ def getCodeFromFile(delay = 15):
       print(code)
       return code
 
-async def main():
-   client = TelegramClient(session, api_id, api_hash)
+
+
+async def main(client):
    await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
-   await create_feeds(client)
-   await client.run_until_disconnected()
+   async with client:
+      await create_feeds(client)
+      await client.run_until_disconnected()
 
-
+# if __name__ == "__main__":
+#     asyncio.run(main(TelegramClient(session, api_id, api_hash)))
