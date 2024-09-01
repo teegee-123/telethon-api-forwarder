@@ -68,8 +68,9 @@ async def create_feeds(client):
       await client.send_message(trade_bot, event.message)
 
 
-def getCodeFromFile(): 
-   time.sleep(15)
+def getCodeFromFile(delay = 15): 
+   if(delay != 0): 
+      time.sleep(delay)
    with open(code_file, "r", encoding="utf-8") as myfile:
       code = myfile.read()
       print(code)
@@ -77,7 +78,7 @@ def getCodeFromFile():
 
 async def main():
    client = TelegramClient(session, api_id, api_hash)
-   await client.start(phone=phone, code_callback=getCodeFromFile)
+   await client.start(phone=phone, code_callback= lambda x: getCodeFromFile(15))
    await create_feeds(client)
    await client.run_until_disconnected()
 

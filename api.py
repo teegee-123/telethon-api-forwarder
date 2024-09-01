@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from dotenv import load_dotenv
 from forwarder import main, getCodeFromFile
+import asyncio 
 load_dotenv()
 code_file = os.environ.get("CODE_FILE")
 
@@ -13,11 +14,11 @@ def set_code(code: int):
      print(code_file)
      f = open(code_file, "w")
      f.write(str(code))
-     return getCodeFromFile()
+     return getCodeFromFile(0)
 
 @app.get("/run")
-async def run():
-     await main()
+def run():
+     asyncio.run(main())
 
 
 @app.get("/ping")
