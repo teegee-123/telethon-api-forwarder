@@ -56,8 +56,9 @@ async def create_feed(client , feed_name, source_id):
       createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name} {source_id}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
       await client(InviteToChannelRequest(channel=newChannelID, users=get_feed_users(feed_name)))
-
+   print(newChannelID)
    users = await client.get_participants(newChannelID)
+   print(users)
    # TODO FOR ALL USERS
    await client.edit_admin(add_admins=True, entity=newChannelID, user = users[1], post_messages = True, edit_messages = True)
    await client.edit_admin(add_admins=True, entity=newChannelID, user = users[2], post_messages = True, edit_messages = True)
