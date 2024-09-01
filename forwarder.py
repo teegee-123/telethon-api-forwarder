@@ -38,7 +38,7 @@ def getIdFromMessage(message):
 def format_id(id):
    id = abs(id)
    if(str(id).startswith("100")):
-      id = str(id[3:])
+      id = str(id)[3:]
    return int(id)
 
 async def feed_exists(client, feed_name):
@@ -62,7 +62,6 @@ async def create_feed(client , feed_name, source_id):
       print(f'using existing group {newChannelID}')
    users = await client.get_participants(newChannelID)
    print(users)
-   # TODO FOR ALL USERS
    for u in users:
       if(u.bot):
          await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
