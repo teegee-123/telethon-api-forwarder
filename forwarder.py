@@ -38,7 +38,7 @@ def getIdFromMessage(message):
 def format_id(id):
    id = abs(id)
    if(str(id).startswith("100")):
-      id = id[3:]
+      id = str(id[3:])
    return int(id)
 
 async def feed_exists(client, feed_name):
