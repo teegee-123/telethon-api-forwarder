@@ -68,7 +68,7 @@ async def create_feeds(client):
       await client.send_message(trade_bot, event.message)
 
 
-async def getCodeFromFile(): 
+def getCodeFromFile(): 
    time.sleep(15)
    with open(code_file, "r", encoding="utf-8") as myfile:
       code = myfile.read()
