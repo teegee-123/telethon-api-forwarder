@@ -69,7 +69,7 @@ async def create_feeds(client):
 
 
 async def getCodeFromFile(): 
-   await time.sleep(15)
+   time.sleep(15)
    with open(code_file, "r", encoding="utf-8") as myfile:
       code = myfile.read()
       print(code)
