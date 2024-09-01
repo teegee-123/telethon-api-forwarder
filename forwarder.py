@@ -35,15 +35,32 @@ def getIdFromMessage(message):
    if(hasattr(message.peer_id, 'chat_id')):
       return message.peer_id.chat_id
 
-async def create_feed(client , feed_name):      
-   createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name}' ,megagroup=True))   
-   newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]     
-   await client(InviteToChannelRequest(channel=newChannelID, users=get_feed_users(feed_name)))
+def format_id(id):
+   id = abs(id)
+   if(str(id).startswith("100")):
+      id = id[3:]
+   return int(id)
+
+async def feed_exists(client, feed_name):
+   async for dialog in client.iter_dialogs():
+      if(dialog.title is not None and dialog.title == f'Feed {feed_name}'):
+         return format_id(dialog.id)
+   return 0
+
+async def applyAdminToUser(client, user, channelId):
+   await client.edit_admin(add_admins=True, entity=channelId, user = user, post_messages = True, edit_messages = True)
+
+async def create_feed(client , feed_name, source_id): 
+   newChannelID = feed_exists(client, feed_name)
+   if(newChannelID == 0):
+      createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name} {source_id}' ,megagroup=True))
+      newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
+      await client(InviteToChannelRequest(channel=newChannelID, users=get_feed_users(feed_name)))
 
    users = await client.get_participants(newChannelID)
    # TODO FOR ALL USERS
-   client.edit_admin(add_admins=True, entity=newChannelID, user = users[1], post_messages = True, edit_messages = True)
-   client.edit_admin(add_admins=True, entity=newChannelID, user = users[2], post_messages = True, edit_messages = True)
+   await client.edit_admin(add_admins=True, entity=newChannelID, user = users[1], post_messages = True, edit_messages = True)
+   await client.edit_admin(add_admins=True, entity=newChannelID, user = users[2], post_messages = True, edit_messages = True)
    return newChannelID
 
 # creates a group with scraper bot and safe bot as participants and for
@@ -53,7 +70,7 @@ async def create_feeds(client):
    for feed in feeds:
       feed_name = feed["name"]
       source_id = feed["id"]
-      id = await create_feed(client, feed_name)
+      id = await create_feed(client, feed_name, source_id)
       feed["channel_id"] = id
 
    sources = list(map(lambda x: x['id'], feeds))
