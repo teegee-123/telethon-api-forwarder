@@ -19,8 +19,13 @@ buy_signals = int(os.environ.get("BUYSIGNALSGROUP"))
 feeds = json.loads(os.environ.get("FEEDS"))
 feed_users = list(map(lambda x: x['users'], feeds)); # add safe analyzer and the bot api user
 print(feeds)
-print(feed_users)
 
+
+def get_feed_users(feed_name):
+   return list(filter(lambda x: x["name"]==feed_name ,feeds))[0]["users"]
+
+for f in feeds:
+   print(get_feed_users(f["name"]))
 
 def getIdFromMessage(message):
    if(hasattr(message.peer_id, 'channel_id')):            
