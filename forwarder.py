@@ -43,6 +43,7 @@ def format_id(id):
 
 async def feed_exists(client, feed_name):
    async for dialog in client.iter_dialogs():
+      print(dialog.title)
       if(dialog.title is not None and dialog.title == f'Feed {feed_name}'):
          return format_id(dialog.id)
    return 0
@@ -55,8 +56,10 @@ async def create_feed(client , feed_name, source_id):
    if(newChannelID == 0):
       createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name} {source_id}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
+      print(f'created new group {newChannelID}')
       await client(InviteToChannelRequest(channel=newChannelID, users=get_feed_users(feed_name)))
-   print(newChannelID)
+   else:
+      print(f'using existing group {newChannelID}')
    users = await client.get_participants(newChannelID)
    print(users)
    # TODO FOR ALL USERS

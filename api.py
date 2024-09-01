@@ -25,7 +25,7 @@ def set_code(code: int):
 
 @app.get("/run")
 def run():
-     asyncio.run(main(client))
+     asyncio.run(main(client))     
      return "Started"
 
 
@@ -36,5 +36,6 @@ def run():
 
 @app.get("/stop")
 async def run():
+     asyncio.get_event_loop().close()
      await client.disconnect()
      return "Stopped"
