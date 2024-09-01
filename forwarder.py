@@ -77,13 +77,24 @@ async def create_feeds(client):
       feed["channel_id"] = id
 
    sources = list(map(lambda x: x['id'], feeds))
+   destinations = list(map(lambda x: x['channel_id'], feeds))
    @client.on(events.NewMessage(chats=sources))
-   async def handler(event):
+   async def handler(event):      
       print("Forward to feed group")
       source_id = getIdFromMessage(event.message)
       destination_id = list(filter(lambda x: x['id'] == source_id, feeds))[0]['channel_id']
       await client.send_message(destination_id, event.message)
+   
+   # listen to destination groups and resend analyzer results
+   @client.on(events.NewMessage(chats=destinations))
+   async def handler(event):
+      if("SafeAnalyzer" in str(event.message)):
+         print("redend analyzer to feed group")
+         from_id = getIdFromMessage(event.message)
+         await client.send_message(from_id, event.message)   
       
+
+
    @client.on(events.NewMessage(chats=[buy_signals]))
    async def handler(event):         
       print("Forward to trade bot")
