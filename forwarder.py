@@ -36,12 +36,14 @@ def getIdFromMessage(message):
       return message.peer_id.chat_id
 
 async def create_feed(client , feed_name):      
-   createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name}' ,megagroup=True))
-   print(createdGroup)
+   createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name}' ,megagroup=True))   
    newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]     
+   print("NEW CHANNEL ID")
+   print(newChannelID)
    await client(InviteToChannelRequest(channel=newChannelID, users=feed_users))
 
    users = await client.get_participants(newChannelID)
+   # TODO FOR ALL USERS
    client.edit_admin(add_admins=True, entity=newChannelID, user = users[1], post_messages = True, edit_messages = True)
    client.edit_admin(add_admins=True, entity=newChannelID, user = users[2], post_messages = True, edit_messages = True)
    return newChannelID
@@ -82,6 +84,4 @@ async def main():
    await create_feeds(client)
    await client.run_until_disconnected()
 
-if __name__ == "__main__":
-    asyncio.run(main())
 
