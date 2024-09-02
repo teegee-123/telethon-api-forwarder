@@ -89,6 +89,10 @@ async def create_report_group(client, report_group_name):
 async def find_report_destination(message_from_id):
    # flat map all report feeds
    report_feeds = list(itertools.chain.from_iterable(map(lambda x: x["feeds"], report_groups)))
+   print("report groups")
+   print(report_groups)
+   print("report feeds")
+   print(report_feeds)
    destination_report_id = list(filter(lambda x: x["channel_id"]==message_from_id, report_feeds))
    if(len(destination_report_id) > 0):
       return destination_report_id["report_channel_id"]
