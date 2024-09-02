@@ -84,7 +84,7 @@ async def create_report_group(client, report_group_name):
       if(u.bot):
          print(f'adding rights for {u.username}' )
          await apply_admin_to_user(client, u, newChannelID)
-
+   return newChannelID
 
 async def find_report_destination(message_from_id):
    # flat map all report feeds
@@ -132,7 +132,7 @@ async def create_groups(client):
    @client.on(events.NewMessage(chats=feed_groups))
    async def handler(event):
       print("feed analyzer response")
-      print(event.message)
+      print(str(event.message))
       if("SafeAnalyzer" in str(event.message)):
          channelId = getSenderIdFromMessage(event.message)
          destination_report_id = await find_report_destination(channelId)
