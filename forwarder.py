@@ -95,6 +95,8 @@ async def find_report_destination(message_from_id):
    print(report_groups)
    print("report feeds")
    print(report_feeds)
+   print("message from id")
+   print(message_from_id)
    destination_report_id = list(filter(lambda x: x["channel_id"]==message_from_id, report_feeds))
    if(len(destination_report_id) > 0):
       return destination_report_id[0]["report_channel_id"]
@@ -153,12 +155,15 @@ async def create_groups(client):
 
 
 def getCodeFromFile(delay = 15): 
-   if(delay != 0): 
-      time.sleep(delay)
-   with open(code_file, "r", encoding="utf-8") as myfile:
-      code = myfile.read()
-      print(code)
-      return code
+   code = ''
+   while(code == ''):
+      with open(code_file, "r", encoding="utf-8") as myfile:
+         code = myfile.read()
+         print(code)
+         return code
+   return code
+   # if(delay != 0): 
+   #    time.sleep(delay)
 
 
 
