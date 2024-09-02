@@ -41,6 +41,8 @@ def format_id(id):
    return int(id)
 
 async def get_group_id(client, feed_name, prefix = None):
+   print("looking for ")
+   print(f'{prefix} {feed_name}' if prefix is not None else feed_name)
    async for dialog in client.iter_dialogs():
       if(dialog.title is not None and dialog.title == f'{prefix} {feed_name}' if prefix is not None else feed_name):
          return format_id(dialog.id)
@@ -95,7 +97,7 @@ async def find_report_destination(message_from_id):
    print(report_feeds)
    destination_report_id = list(filter(lambda x: x["channel_id"]==message_from_id, report_feeds))
    if(len(destination_report_id) > 0):
-      return destination_report_id["report_channel_id"]
+      return destination_report_id[0]["report_channel_id"]
    return None
 # creates a group with scraper bot and safe bot as participants and for
 # also listens for messages on buy signals and forwards to trade bot
@@ -136,7 +138,7 @@ async def create_groups(client):
       if("SafeAnalyzer" in str(event.message)):
          channelId = getSenderIdFromMessage(event.message)
          destination_report_id = await find_report_destination(channelId)
-         if(destination_report_id):
+         if(destination_report_id is not None):
             print("Send analyzed report to report group")
             await client.send_message(destination_report_id, event.message)
          else: 
