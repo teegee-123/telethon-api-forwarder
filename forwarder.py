@@ -72,7 +72,7 @@ async def create_report_group(client, report_group_name):
    print("newChannelID REPORT ")
    print(newChannelID)
    if(newChannelID == 0):
-      createdGroup = await client(CreateChannelRequest(f'REPORT {report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
+      createdGroup = await client(CreateChannelRequest(f'{report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
       print(f'created new report group {newChannelID}')
       await client(InviteToChannelRequest(channel=newChannelID, users=get_group_users(report_group_name, report_groups)))
