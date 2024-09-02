@@ -66,14 +66,14 @@ async def create_feed(client , feed_name, source_id):
    return newChannelID
 
 async def create_report_group(client, report_group_name):
-   report_group_id = get_group_id(client, report_group_name)
-   if(report_group_id == 0):
+   newChannelID = get_group_id(client, report_group_name)
+   if(newChannelID == 0):
       createdGroup = await client(CreateChannelRequest(f'REPORT {report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
       print(f'created new report group {newChannelID}')
       await client(InviteToChannelRequest(channel=newChannelID, users=get_group_users(report_group_name, report_groups)))
    else:
-      print(f"using existing report group {report_group_id}")
+      print(f"using existing report group {newChannelID}")
    
    users = await client.get_participants(newChannelID)
    for u in users:
