@@ -66,7 +66,11 @@ async def create_feed(client , feed_name, source_id):
    return newChannelID
 
 async def create_report_group(client, report_group_name):
+   print('create_report_group')
+   print(report_group_name)
    newChannelID = await get_group_id(client, report_group_name)
+   print("newChannelID REPORT ")
+   print(newChannelID)
    if(newChannelID == 0):
       createdGroup = await client(CreateChannelRequest(f'REPORT {report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
@@ -125,7 +129,7 @@ async def create_groups(client):
    async def handler(event):
       if("SafeAnalyzer" in str(event.message)):
          channelId = getSenderIdFromMessage(event.message)
-         destination_report_id = find_report_destination(channelId)
+         destination_report_id = await find_report_destination(channelId)
          if(destination_report_id):
             print("Send analyzed report to report group")
             await client.send_message(destination_report_id, event.message)
