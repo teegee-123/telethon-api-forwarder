@@ -131,6 +131,8 @@ async def create_groups(client):
    #forward from feed groups to report group
    @client.on(events.NewMessage(chats=feed_groups))
    async def handler(event):
+      print("feed analyzer response")
+      print(event.message)
       if("SafeAnalyzer" in str(event.message)):
          channelId = getSenderIdFromMessage(event.message)
          destination_report_id = await find_report_destination(channelId)
