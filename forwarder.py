@@ -46,7 +46,7 @@ async def get_group_id(client, feed_name):
          return format_id(dialog.id)
    return 0
 
-async def applyAdminToUser(client, user, channelId):
+async def apply_admin_to_user(client, user, channelId):
    await client.edit_admin(add_admins=True, entity=channelId, user = user, post_messages = True, edit_messages = True)
 
 async def create_feed(client , feed_name, source_id): 
@@ -62,7 +62,7 @@ async def create_feed(client , feed_name, source_id):
    for u in users:
       if(u.bot):
          print(f'adding rights for {u.username}' )
-         await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
+         await apply_admin_to_user(client, u, newChannelID)
    return newChannelID
 
 async def create_report_group(client, report_group_name):
@@ -83,7 +83,7 @@ async def create_report_group(client, report_group_name):
    for u in users:
       if(u.bot):
          print(f'adding rights for {u.username}' )
-         await client.edit_admin(add_admins=True, entity=newChannelID, user = u, post_messages = True, edit_messages = True)
+         await apply_admin_to_user(client, u, newChannelID)
 
 
 async def find_report_destination(message_from_id):
@@ -107,7 +107,7 @@ async def create_groups(client):
       report_group["report_channel_id"] = await create_report_group(client, group_name)
       for feed in report_group["feeds"]:
          feed["report_channel_id"] = report_group["report_channel_id"]
-         feed["channel_id"] = get_group_id(client, feed["name"])
+         feed["channel_id"] = await get_group_id(client, feed["name"])
          if(feed["channel_id"] == 0):
             raise f'Check your configs Could not find a report group for {feed["name"]}'
 
