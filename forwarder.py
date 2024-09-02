@@ -40,9 +40,9 @@ def format_id(id):
       id = str(id)[3:]
    return int(id)
 
-async def get_group_id(client, feed_name):
+async def get_group_id(client, feed_name, prefix = None):
    async for dialog in client.iter_dialogs():
-      if(dialog.title is not None and dialog.title == f'Feed {feed_name}'):
+      if(dialog.title is not None and dialog.title == f'{prefix} {feed_name}' if prefix is not None else feed_name):
          return format_id(dialog.id)
    return 0
 
@@ -50,7 +50,7 @@ async def apply_admin_to_user(client, user, channelId):
    await client.edit_admin(add_admins=True, entity=channelId, user = user, post_messages = True, edit_messages = True)
 
 async def create_feed(client , feed_name, source_id): 
-   newChannelID = await get_group_id(client, feed_name)
+   newChannelID = await get_group_id(client, feed_name, 'Feed')
    if(newChannelID == 0):
       createdGroup = await client(CreateChannelRequest(f'Feed {feed_name}', f'forwards from {feed_name} {source_id}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
@@ -68,11 +68,11 @@ async def create_feed(client , feed_name, source_id):
 async def create_report_group(client, report_group_name):
    print('create_report_group')
    print(report_group_name)
-   newChannelID = await get_group_id(client, report_group_name)
+   newChannelID = await get_group_id(client, report_group_name, "Report")
    print("newChannelID REPORT ")
    print(newChannelID)
    if(newChannelID == 0):
-      createdGroup = await client(CreateChannelRequest(f'{report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
+      createdGroup = await client(CreateChannelRequest(f'Report {report_group_name}', f'reports for {report_group_name}' ,megagroup=True))
       newChannelID = createdGroup.__dict__["chats"][0].__dict__["id"]
       print(f'created new report group {newChannelID}')
       await client(InviteToChannelRequest(channel=newChannelID, users=get_group_users(report_group_name, report_groups)))
@@ -107,7 +107,7 @@ async def create_groups(client):
       report_group["report_channel_id"] = await create_report_group(client, group_name)
       for feed in report_group["feeds"]:
          feed["report_channel_id"] = report_group["report_channel_id"]
-         feed["channel_id"] = await get_group_id(client, feed["name"])
+         feed["channel_id"] = await get_group_id(client, feed["name"], None)
          if(feed["channel_id"] == 0):
             print(f'Check your configs Could not find a report group for {feed["name"]}')
 
