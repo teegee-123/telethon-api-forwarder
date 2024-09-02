@@ -103,7 +103,7 @@ async def create_groups(client):
       report_group["report_channel_id"] = await create_report_group(client, group_name)
       for feed in report_group["feeds"]:
          feed["report_channel_id"] = report_group["report_channel_id"]
-         feed["channel_id"] = get_group_id(feed["name"])
+         feed["channel_id"] = get_group_id(client, feed["name"])
          if(feed["channel_id"] == 0):
             raise f'Check your configs Could not find a report group for {feed["name"]}'
 
