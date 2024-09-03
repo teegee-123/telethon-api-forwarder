@@ -16,11 +16,11 @@ app = FastAPI()
 client = TelegramClient(session, api_id, api_hash)
 
 
-from starlette.background import BackgroundTasks
+# from starlette.background import BackgroundTasks
 
-@app.on_event("startup")
-def startup_event():
-     asyncio.run(main(client))
+# @app.on_event("startup")
+# def startup_event():
+#      asyncio.run(main(client))
 
 @app.get("/code/{code}")
 def set_code(code: int):
