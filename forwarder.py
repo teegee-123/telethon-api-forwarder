@@ -13,7 +13,7 @@ api_id = os.environ.get("API_ID")
 api_hash = os.environ.get("API_HASH")
 code_file = os.environ.get("CODE_FILE")
 trade_bot = os.environ.get("TRADEBOTNAME")
-buy_signals = int(os.environ.get("BUYSIGNALSGROUP"))
+buy_signals_group = json.loads(os.environ.get("BUYSIGNALSGROUP"))
 report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 
@@ -49,15 +49,16 @@ async def find_group_by_name(client, group_name):
    return None
 
 
-async def create_group(client, group_name, group_users, prefix = None, description = "no description"):
+async def create_group(client, group_name, group_users = None, prefix = None, description = "no description"):
    group_full_name = group_name if prefix is None else f'{prefix} {group_name}'
    group_id = await find_group_by_name(client, group_full_name)
    if(group_id is None):      
       createdGroup = await client(CreateChannelRequest(f'{prefix} {group_name}', description, megagroup=True))
       group_id = createdGroup.__dict__["chats"][0].__dict__["id"]
       print(f'created group {group_full_name} with id {group_id}')
-      await client(InviteToChannelRequest(channel=group_id, users=group_users))
-      await give_users_admin_rights(client, group_id)
+      if(group_users is not None):
+         await client(InviteToChannelRequest(channel=group_id, users=group_users))
+         await give_users_admin_rights(client, group_id)
    else:
       print(f'used exiting group {group_full_name} with id {group_id}')
    
@@ -106,8 +107,12 @@ async def create_report_groups(client):
       for feed in report_group["feeds"]:
          feed["report_channel_id"] = report_group["report_channel_id"]
          feed["channel_id"] = await find_group_by_name(client, feed["name"])
-         # if(feed["channel_id"] == 0):
-         #    print(f'Check your configs Could not find a report group for {feed["name"]}')
+         if(feed["channel_id"] is None):
+            print(f'Check your configs Could not find a report group for {feed["name"]}')
+
+async def create_buy_signals_group(client):
+   group_name = buy_signals_group["name"]
+   buy_signals_group["channel_id"] = await create_group(client, group_name, None, 'Signals', f'Buy signals will be forwarded to {trade_bot}')
 
 # creates a group with scraper bot and safe bot as participants and for
 # also listens for messages on buy signals and forwards to trade bot
@@ -115,6 +120,7 @@ async def create_groups(client):
    print("CONNECTED")
    await create_feed_groups(client)
    await create_report_groups(client)
+   await create_buy_signals_group(client)
 
    feed_sources = list(map(lambda x: x['id'], feeds))
 
@@ -144,7 +150,7 @@ async def create_groups(client):
       
 
    # forward from buy signals group to trade bot
-   @client.on(events.NewMessage(chats=[buy_signals]))
+   @client.on(events.NewMessage(chats=[buy_signals_group['channel_id']]))
    async def handler(event):         
       print("Forward to trade bot")
       await client.send_message(trade_bot, event.message)
