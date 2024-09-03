@@ -112,7 +112,8 @@ async def create_report_groups(client):
 
 async def create_buy_signals_group(client):
    group_name = buy_signals_group["name"]
-   buy_signals_group["channel_id"] = await create_group(client, group_name, None, 'Signals', f'Buy signals will be forwarded to {trade_bot}')
+   all_report_bots = list(itertools.chain.from_iterable(map(lambda x: x["users"], report_groups)))
+   buy_signals_group["channel_id"] = await create_group(client, group_name, all_report_bots, 'Signals', f'Buy signals will be forwarded to {trade_bot}')
 
 # creates a group with scraper bot and safe bot as participants and for
 # also listens for messages on buy signals and forwards to trade bot
