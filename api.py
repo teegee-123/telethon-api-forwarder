@@ -13,8 +13,15 @@ api_hash = os.environ.get("API_HASH")
 
 
 app = FastAPI()
-
 client = TelegramClient(session, api_id, api_hash)
+
+
+from starlette.background import BackgroundTasks
+
+@app.on_event("startup")
+def startup_event():
+     asyncio.run(main(client))
+
 @app.get("/code/{code}")
 def set_code(code: int):
      print(code_file)
@@ -39,3 +46,6 @@ async def run():
      asyncio.get_event_loop().close()
      await client.disconnect()
      return "Stopped"
+
+
+

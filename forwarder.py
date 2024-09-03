@@ -1,6 +1,6 @@
 import os
 import json
-import time
+import datetime
 import itertools
 from telethon.sync import TelegramClient, events
 from dotenv import load_dotenv, dotenv_values 
@@ -126,6 +126,7 @@ async def create_groups(client):
    feed_sources = list(map(lambda x: x['id'], feeds))
 
    print("Listening...")
+   client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
    #forward from sources to feed groups
    @client.on(events.NewMessage(chats=feed_sources))
    async def handler(event):      
