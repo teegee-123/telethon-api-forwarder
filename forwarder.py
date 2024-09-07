@@ -5,6 +5,8 @@ import itertools
 from telethon.sync import TelegramClient, events
 from dotenv import load_dotenv, dotenv_values 
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
+
+from interactor import MaestroInteractor
 load_dotenv()
 
 phone = os.environ.get("PHONE")
@@ -171,9 +173,10 @@ def getCodeFromFile(delay = 15):
 
 
 async def main(client):
+   interactor =  MaestroInteractor(client)
    await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
    async with client:
-      await create_groups(client)
+      await create_groups(client)      
       await client.run_until_disconnected()
 
 # if __name__ == "__main__":
