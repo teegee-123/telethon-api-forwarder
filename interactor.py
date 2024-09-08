@@ -23,7 +23,7 @@ class MaestroInteractor:
       self.buttons: list[{"name", "data"}] = [] 
       self.current_trades:list[{"name", "stop_loss", "percent"}] = []
 
-      # monitor_updated_filter=lambda x: type(x) is UpdateEditMessage and x.message.message.startswith("📌 Primary Trade") and x.message.peer_id.user_id == self.maestro_id
+      monitor_updated_filter=lambda x: type(x) is UpdateEditMessage and x.message.message.startswith("📌 Primary Trade") and x.message.peer_id.user_id == self.maestro_id
       # monitor_messaged_filter=lambda x: type(x.original_update) is UpdateNewMessage and x.original_update.message.message.startswith("📌 Primary Trade") and x.original_update.message.peer_id.user_id == self.maestro_id
 
 
@@ -38,7 +38,7 @@ class MaestroInteractor:
             print("new monitor shown start iterating")
             await message.message.click(text="➡")
 
-      @client.on(events.MessageEdited(chats=[self.maestro_id]))
+      @client.on(events.MessageEdited(chats=[self.maestro_id], func=monitor_updated_filter))
       async def handler(event: UpdateEditMessage):
          self.current_monitor = event
          self.buttons = self.get_buttons_from_menu(event)
