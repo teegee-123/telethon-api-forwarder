@@ -42,7 +42,7 @@ class MaestroInteractor:
       async def handler(event: UpdateEditMessage):
          self.current_monitor = event
          self.buttons = self.get_buttons_from_menu(event)
-         print(f'Pinned: {event.message.pinned}');
+         print(f'Pinned: {event.message.pinned}')
          print(f'Current Trades: {self.current_trades}')
          #if it has '%' button click it, we want to set SL
          if('%' in [x['text'] for x in self.buttons]):
