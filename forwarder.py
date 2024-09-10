@@ -142,6 +142,14 @@ async def create_groups(client):
    @client.on(events.NewMessage(chats=feed_groups))
    async def handler(event):
       if("SafeAnalyzer" in str(event.message)):
+         try:
+            chat_from = event.chat if event.chat else (await event.get_chat()) # telegram MAY not send the chat enity
+            chat_title = chat_from.title
+            print(f'message {event.message}')
+            print(f'chat title {chat_title}')
+            print(f'message replaced {str(event.message).replace("SafeAnalyzer", chat_title)}')
+         except:
+            print("COULD NOT GET CHAT TITLE")
          print("feed analyzer response")         
          channelId = getSenderIdFromMessage(event.message)
          destination_report_id = await find_report_destination(channelId)
