@@ -138,7 +138,9 @@ async def create_groups(client):
       source_id = getSenderIdFromMessage(event.message)
       destination = list(filter(lambda x: x['id'] == source_id, feeds))[0]
       try:
-         if (destination['lookup'] is not None):
+         if ('lookup' in destination and destination['lookup'] is not None):
+            print(destination)
+            print(destination['lookup'])
             lookup = destination['lookup']+'*.*'
             event.message.message =  re.search(lookup, event.message.message).group() 
       except:
