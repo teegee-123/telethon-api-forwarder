@@ -139,7 +139,7 @@ async def create_groups(client):
       destination = list(filter(lambda x: x['id'] == source_id, feeds))[0]
       try:
          if (destination['lookup'] is not None):
-            lookup = f'{destination['lookup']}*.*'
+            lookup = destination['lookup']+'*.*'
             event.message.message =  re.search(lookup, event.message.message).group() 
       except:
          print('lookup not defined')
