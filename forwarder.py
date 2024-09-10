@@ -145,9 +145,10 @@ async def create_groups(client):
          try:
             chat_from = event.chat if event.chat else (await event.get_chat()) # telegram MAY not send the chat enity
             chat_title = chat_from.title
-            print(f'message {event.message}')
-            print(f'chat title {chat_title}')
-            print(f'message replaced {str(event.message).replace("SafeAnalyzer", chat_title)}')
+            #print(f'message {event.message}')
+            print(f'from chat {chat_title}')
+            event.message.message = event.message.message.replace("SafeAnalyzer", f'SafeAnalyzer|{chat_title.replcace('Feed ', '')}')
+            #print(f'message replaced {str(event.message).replace("SafeAnalyzer | ", chat_title)}')
          except:
             print("COULD NOT GET CHAT TITLE")
          print("feed analyzer response")         
