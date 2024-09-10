@@ -6,6 +6,7 @@ from telethon.sync import TelegramClient, events
 from dotenv import load_dotenv, dotenv_values 
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
 import time
+import re
 
 from interactor import MaestroInteractor
 load_dotenv()
@@ -135,8 +136,14 @@ async def create_groups(client):
    async def handler(event):      
       print("Forward to feed group")
       source_id = getSenderIdFromMessage(event.message)
-      destination_id = list(filter(lambda x: x['id'] == source_id, feeds))[0]['channel_id']
-      await client.send_message(destination_id, event.message)
+      destination = list(filter(lambda x: x['id'] == source_id, feeds))[0]
+      try:
+         if (destination['lookup'] is not None):
+            event.message.message =  re.search(f'{destination['lookup']}*.*', event.message.message).group() 
+      except:
+         print('lookup not defined')
+
+      await client.send_message(destination['channel_id'], event.message)
    
    feed_groups = list(map(lambda x: x['channel_id'], feeds))
    #forward from feed groups to report group
