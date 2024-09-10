@@ -37,6 +37,8 @@ class MaestroInteractor:
          elif(message.message.message.startswith("📌 Primary Trade")):
             print("new monitor shown start iterating")
             await message.message.click(text="➡")
+         elif(message.message.message.startswith("❌ You do not have any active monitors!")):
+            self.current_trades = []
 
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
       async def handler(event: UpdateEditMessage):
@@ -76,13 +78,13 @@ class MaestroInteractor:
                print(f'setting new SL prev: {primary_trade["stop_loss"]}, new: {primary_trade["percent"] + self.trailing_stop}')
                primary_trade["stop_loss"] = primary_trade["percent"] + self.trailing_stop
                print("clicking stop loss button")
-               await self.current_monitor.message.click(data=self.get_stop_loss_button(self.buttons)["data"])               
+               await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
             else:
                # iterate trades
                print(f'No need to set Stop loss, old: {primary_trade["stop_loss"]} new: {primary_trade["percent"] + self.trailing_stop}')
                print(f'Navigating to next trade. Current trade: {primary_trade_name}')
                nav_right_button = self.get_right_nav_button(self.buttons)
-               await event.message.click(data=nav_right_button["data"])
+               await event.message.click(text=nav_right_button["text"])
                time.sleep(self.sleep_period)
             
 
