@@ -148,7 +148,7 @@ async def create_groups(client):
             chat_title = chat_from.title
             #print(f'message {event.message}')
             print(f'from chat {chat_title}')
-            event.message.message = event.message.message.replace("SafeAnalyzer", f'SafeAnalyzer|{chat_title}')
+            event.message.message = event.message.message + "\n" + "Source feed: " + chat_title + "\n"
             #print(f'message replaced {str(event.message).replace("SafeAnalyzer | ", chat_title)}')
          except:
             print("COULD NOT GET CHAT TITLE")
