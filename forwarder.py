@@ -5,6 +5,7 @@ import itertools
 from telethon.sync import TelegramClient, events
 from dotenv import load_dotenv, dotenv_values 
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
+import time
 
 from interactor import MaestroInteractor
 load_dotenv()
@@ -166,6 +167,7 @@ async def create_groups(client):
    @client.on(events.NewMessage(chats=[buy_signals_group['channel_id']]))
    async def handler(event):         
       print("Forward to trade bot")
+      # time.sleep(2) #TODO add this if neccessary
       await client.send_message(trade_bot, event.message)
 
 

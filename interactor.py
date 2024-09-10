@@ -38,6 +38,7 @@ class MaestroInteractor:
             print("new monitor shown start iterating")
             await message.message.click(text="➡")
          elif(message.message.message.startswith("❌ You do not have any active monitors!")):
+            print("clearing trades")
             self.current_trades = []
 
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
