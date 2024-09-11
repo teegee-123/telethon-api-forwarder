@@ -195,9 +195,9 @@ def getCodeFromFile(delay = 15):
 
 
 async def main(client):
-   interactor =  MaestroInteractor(client)
    await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
    async with client:
+      interactor =  MaestroInteractor(client)
       await create_groups(client)      
       await client.run_until_disconnected()
 
