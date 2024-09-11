@@ -8,7 +8,6 @@ from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannel
 from telethon.tl.types import KeyboardButtonCallback
 from telethon.tl.types import Message
 from telethon.tl.types import UpdateEditMessage, UpdateNewMessage
-
 load_dotenv()
 
 class MaestroInteractor:   

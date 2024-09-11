@@ -9,6 +9,9 @@ import time
 import re
 
 from interactor import MaestroInteractor
+
+
+
 load_dotenv()
 
 phone = os.environ.get("PHONE")
@@ -23,8 +26,8 @@ report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 feeds = json.loads(os.environ.get("FEEDS"))
 report_groups = json.loads(os.environ.get("REPORT_GROUPS"))
-print(feeds)
-print(report_groups)
+print(f'feeds {feeds}')
+print(f'report_groups {report_groups}')
 
 
 def get_group_users_to_add(group_name, groups):
