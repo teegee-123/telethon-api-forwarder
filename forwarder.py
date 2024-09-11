@@ -201,8 +201,8 @@ async def main(client):
       print("client started")
    except Exception as error:
       print(f'error starting client {error}')
-   interactor =  MaestroInteractor(client)
    async with client:
+      interactor =  MaestroInteractor(client)
       await create_groups(client)      
       await client.run_until_disconnected()
 
