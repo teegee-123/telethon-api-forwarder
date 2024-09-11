@@ -142,6 +142,7 @@ async def create_groups(client):
             print(destination)
             print(destination['lookup'])
             lookup = destination['lookup']+'*.*'
+            print("lookup "+ lookup)
             event.message.message =  re.search(lookup, event.message.message).group() 
       except:
          print('lookup not defined')
