@@ -205,6 +205,7 @@ class TelegramManager:
          with open(code_file, "r", encoding="utf-8") as myfile:
             code = myfile.read()
       print(code)
+      open("filename", "w").close()
       return code
 
    async def run(self):      

@@ -84,11 +84,27 @@ class Sheets:
                         }
                     }
                 flow = InstalledAppFlow.from_client_config(client_config=config , scopes=SCOPES)
-                self.creds = flow.run_console()
+                #self.creds = flow.run_console()
+                flow.redirect_uri = flow._OOB_REDIRECT_URI
+                auth_url, _ = flow.authorization_url()
+                print(auth_url)
+                code = getCodeFromFile()
+                flow.fetch_token(code=code)
+                with open(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"), "w") as token:
+                    token.write(flow.credentials.to_json())
+                
 
             # Save the credentials for the next run
             with open("token.json", "w") as token:
                 token.write(self.creds.to_json())
-
+            
+        def getCodeFromFile(self): 
+            code = ''
+            while(code == ''):
+                with open(os.environ.get("CODE_FILE"), "r", encoding="utf-8") as myfile:
+                    code = myfile.read()
+            print(code)
+            open("filename", "w").close()
+            return code
 s = Sheets()
 s.read()

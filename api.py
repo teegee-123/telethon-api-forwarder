@@ -14,7 +14,7 @@ api_hash = os.environ.get("API_HASH")
 
 app = FastAPI()
 client = TelegramClient(session, api_id, api_hash)
-
+manager = TelegramManager()
 
 # from starlette.background import BackgroundTasks
 
@@ -28,11 +28,11 @@ def set_code(code: int):
      f = open(code_file, "w")
      f.write(str(code))
      f.close()
-     return getCodeFromFile()
+     return manager.getCodeFromFile()
 
 @app.get("/run")
 def run():     
-     asyncio.run(TelegramManager().run())     
+     asyncio.run(manager.run())     
      return "Started"
 
 
