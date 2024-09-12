@@ -233,5 +233,6 @@ class TelegramManager:
                await self.create_groups()
       except:
          print("Failed to read sheets")
+         self.sheets.auth()
 
 

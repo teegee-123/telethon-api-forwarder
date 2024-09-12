@@ -84,8 +84,8 @@ class Sheets:
                         }
                     }
                 flow = InstalledAppFlow.from_client_config(client_config=config , scopes=SCOPES)
+                self.creds = flow.run_console()
 
-            self.creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open("token.json", "w") as token:
                 token.write(self.creds.to_json())
