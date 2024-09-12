@@ -25,16 +25,17 @@ buy_signals_group = json.loads(os.environ.get("BUYSIGNALSGROUP"))
 report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 
-sheets = Sheets()
-feeds = sheets.read_feeds()
-report_groups  = sheets.read_reports()
-print(f'feeds {feeds}')
-print(f'report_groups {report_groups}')
 
 
 class TelegramManager:
    client: TelegramClient
    def __init__(self, client: TelegramClient):
+      self.sheets = Sheets()
+      self.feeds = self.sheets.read_feeds()
+      self.report_groups  = self.sheets.read_reports()
+      print(f'feeds {self.feeds}')
+      print(f'report_groups {self.report_groups}')
+
       self.client = client
 
    def get_group_users_to_add(self, group_name: str, groups):
@@ -91,31 +92,31 @@ class TelegramManager:
       await self.client.edit_admin(add_admins=True, entity=channelId, user = user, post_messages = True, edit_messages = True)
 
    async def create_feed(self, feed_name: str, source_id): 
-      group_users = self.get_group_users_to_add(feed_name, feeds)
+      group_users = self.get_group_users_to_add(feed_name, self.feeds)
       group_id = await self.create_group(feed_name, group_users, 'Feed', f'forwards from {source_id}')   
       return group_id
 
    async def create_report_group(self, report_group_name: str, group_description: str):
-      group_users = self.get_group_users_to_add(report_group_name, report_groups)
+      group_users = self.get_group_users_to_add(report_group_name, self.report_groups)
       group_id = await self.create_group(report_group_name, group_users, "Report", group_description)
       return group_id
 
    async def find_report_destination(self, message_from_id: int):
       # flat map all report feeds
-      report_feeds = list(itertools.chain.from_iterable(map(lambda x: x["feeds"], report_groups)))
+      report_feeds = list(itertools.chain.from_iterable(map(lambda x: x["feeds"], self.report_groups)))
       destination_report_id = list(filter(lambda x: x["channel_id"]==message_from_id, report_feeds))
       if(len(destination_report_id) > 0):
          return destination_report_id[0]["report_channel_id"]
       return None
 
    async def create_feed_groups(self):
-      for feed in feeds:
+      for feed in self.feeds:
          feed_name = feed["name"]
          source_id = feed["id"]
          feed["channel_id"] = await self.create_feed(feed_name, source_id)
    
    async def create_report_groups(self):
-      for report_group in report_groups:
+      for report_group in self.report_groups:
          group_name = report_group["name"]      
          report_group["report_channel_id"] = await self.create_report_group(group_name, 'reports for addChannelNames')
          for feed in report_group["feeds"]:
@@ -126,7 +127,7 @@ class TelegramManager:
 
    async def create_buy_signals_group(self):
       group_name = buy_signals_group["name"]
-      all_report_bots = list(itertools.chain.from_iterable(map(lambda x: x["users"], report_groups)))
+      all_report_bots = list(itertools.chain.from_iterable(map(lambda x: x["users"], self.report_groups)))
       buy_signals_group["channel_id"] = await self.create_group(group_name, all_report_bots, 'Signals', f'Buy signals will be forwarded to {trade_bot}')
 
    # creates a group with scraper bot and safe bot as participants and for
@@ -143,13 +144,13 @@ class TelegramManager:
    async def start_listeners(self):
       print("Listening...")
       await self.client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
-      feed_sources = list(map(lambda x: x['id'], feeds))
+      feed_sources = list(map(lambda x: x['id'], self.feeds))
       #forward from sources to feed groups
       @self.client.on(events.NewMessage(chats=feed_sources))
       async def handler(event):         
          print("Forward to feed group")
          source_id = self.getSenderIdFromMessage(event.message)
-         destination = list(filter(lambda x: x['id'] == source_id, feeds))[0]
+         destination = list(filter(lambda x: x['id'] == source_id, self.feeds))[0]
          try:
             if ('lookup' in destination and destination['lookup'] is not None):
                print(destination)
@@ -162,7 +163,7 @@ class TelegramManager:
 
          await self.client.send_message(destination['channel_id'], event.message)
       
-      feed_groups = list(map(lambda x: x['channel_id'], feeds))
+      feed_groups = list(map(lambda x: x['channel_id'], self.feeds))
       #forward from feed groups to report group
       @self.client.on(events.NewMessage(chats=feed_groups))
       async def handler(event):
@@ -223,8 +224,8 @@ class TelegramManager:
    ######### TODO REPLACE WITH AN EVENT FROM THE SHEET
    async def check_for_new_feeds(self):
       try:
-         r = sheets.read_reports()
-         f = sheets.read_feeds()
+         r = self.sheets.read_reports()
+         f = self.sheets.read_feeds()
          if(report_groups != r and feeds != f):
                feeds = f
                report_groups = r
