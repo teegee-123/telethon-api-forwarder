@@ -71,9 +71,10 @@ class Sheets:
         open("filename", "w").close()
         return code
 
-    def auth(self):        
-        if os.path.exists("token.json"):
-            self.creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+    def auth(self): 
+        token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
+        if os.path.exists(token_file):
+            self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)
         # If there are no (valid) credentials available, let the user log in.
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
@@ -100,12 +101,12 @@ class Sheets:
                 print(auth_url)
                 code = self.getCodeFromFile()
                 flow.fetch_token(code=code)
-                with open(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"), "w") as token:
+                with open(token_file, "w") as token:
                     token.write(flow.credentials.to_json())
                 
 
             # Save the credentials for the next run
-            with open("token.json", "w") as token:
+            with open(token_file, "w") as token:
                 token.write(self.creds.to_json())
 
 s = Sheets()
