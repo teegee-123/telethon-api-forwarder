@@ -121,28 +121,3 @@ class MaestroInteractor:
          return list(map(lambda x: x['text'] , buttons)).index(text)
       except:
          return None
-
-
-
-# phone = os.environ.get("PHONE")
-# session = os.environ.get("SESSION")
-# api_id = os.environ.get("API_ID") 
-# api_hash = os.environ.get("API_HASH")
-# code_file = os.environ.get("CODE_FILE")
-
-
-
-
-
-
-
-
-# async def main(client: TelegramClient):
-#    interactor =  MaestroInteractor(client)
-#    await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
-#    async with client:
-#       await interactor.send_command(client, 'monitor')
-#       await client.run_until_disconnected()      
-#       #await client.disconnect()      
-   
-# asyncio.run(main(TelegramClient(session, api_id, api_hash)))

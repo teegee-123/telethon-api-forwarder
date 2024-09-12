@@ -28,7 +28,7 @@ def set_code(code: int):
      f = open(code_file, "w")
      f.write(str(code))
      f.close()
-     return getCodeFromFile(0)
+     return getCodeFromFile()
 
 @app.get("/run")
 def run():
@@ -42,10 +42,7 @@ def run():
 
 
 @app.get("/stop")
-async def run():
-     asyncio.get_event_loop().close()
+async def run():     
      await client.disconnect()
      return "Stopped"
-
-
 
