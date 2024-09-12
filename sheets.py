@@ -61,6 +61,16 @@ class Sheets:
                 .get(spreadsheetId=self.spreadsheet_id, range=range)
                 .execute()).get("values", [])
 
+            
+    def getCodeFromFile(self): 
+        code = ''
+        while(code == ''):
+            with open(os.environ.get("CODE_FILE"), "r", encoding="utf-8") as myfile:
+                code = myfile.read()
+        print(code)
+        open("filename", "w").close()
+        return code
+
     def auth(self):        
         if os.path.exists("token.json"):
             self.creds = Credentials.from_authorized_user_file("token.json", SCOPES)
@@ -88,7 +98,7 @@ class Sheets:
                 flow.redirect_uri = flow._OOB_REDIRECT_URI
                 auth_url, _ = flow.authorization_url()
                 print(auth_url)
-                code = getCodeFromFile()
+                code = self.getCodeFromFile()
                 flow.fetch_token(code=code)
                 with open(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS"), "w") as token:
                     token.write(flow.credentials.to_json())
@@ -97,14 +107,6 @@ class Sheets:
             # Save the credentials for the next run
             with open("token.json", "w") as token:
                 token.write(self.creds.to_json())
-            
-        def getCodeFromFile(self): 
-            code = ''
-            while(code == ''):
-                with open(os.environ.get("CODE_FILE"), "r", encoding="utf-8") as myfile:
-                    code = myfile.read()
-            print(code)
-            open("filename", "w").close()
-            return code
+
 s = Sheets()
 s.read()
