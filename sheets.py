@@ -30,6 +30,8 @@ class Sheets:
         print("feeds")
         mapped_feeds = []
         for feed in feeds:
+            if(not feed[0] or not feed[1] or not feed[2]):
+                print(f'cannot parse feed {feed}')                
             mapped_feed = { "id": feed[0], "name": feed[1], "users": json.loads(feed[2]) }
             mapped_feeds.append(mapped_feed)
         
@@ -42,6 +44,9 @@ class Sheets:
         print("reports")            
         mapped_reports = []
         for report in reports:
+            if(not report[0] or not report[1] or not report[2]):
+                print(f'cannot parse report {report}')
+
             report_feeds = json.loads(report[2])
             mapped_report_feeds = list(map(lambda r: {"name": r},report_feeds))
             mapped_report = { "name": report[0], "users": json.loads(report[1]), "feeds": mapped_report_feeds }
