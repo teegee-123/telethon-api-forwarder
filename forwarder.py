@@ -5,6 +5,13 @@ import itertools
 from telethon.sync import TelegramClient, events
 from dotenv import load_dotenv, dotenv_values 
 from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannelRequest
+import time
+import re
+
+from interactor import MaestroInteractor
+
+
+
 load_dotenv()
 
 phone = os.environ.get("PHONE")
@@ -19,8 +26,8 @@ report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 feeds = json.loads(os.environ.get("FEEDS"))
 report_groups = json.loads(os.environ.get("REPORT_GROUPS"))
-print(feeds)
-print(report_groups)
+print(f'feeds {feeds}')
+print(f'report_groups {report_groups}')
 
 
 def get_group_users_to_add(group_name, groups):
@@ -126,20 +133,39 @@ async def create_groups(client):
    feed_sources = list(map(lambda x: x['id'], feeds))
 
    print("Listening...")
-   client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
+   await client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
    #forward from sources to feed groups
    @client.on(events.NewMessage(chats=feed_sources))
    async def handler(event):      
       print("Forward to feed group")
       source_id = getSenderIdFromMessage(event.message)
-      destination_id = list(filter(lambda x: x['id'] == source_id, feeds))[0]['channel_id']
-      await client.send_message(destination_id, event.message)
+      destination = list(filter(lambda x: x['id'] == source_id, feeds))[0]
+      try:
+         if ('lookup' in destination and destination['lookup'] is not None):
+            print(destination)
+            print(destination['lookup'])
+            lookup = destination['lookup']+'*.*'
+            print("lookup "+ lookup)
+            event.message.message =  re.search(lookup, event.message.message).group() 
+      except:
+         print('lookup not defined')
+
+      await client.send_message(destination['channel_id'], event.message)
    
    feed_groups = list(map(lambda x: x['channel_id'], feeds))
    #forward from feed groups to report group
    @client.on(events.NewMessage(chats=feed_groups))
    async def handler(event):
       if("SafeAnalyzer" in str(event.message)):
+         try:
+            chat_from = event.chat if event.chat else (await event.get_chat()) # telegram MAY not send the chat enity
+            chat_title = chat_from.title
+            #print(f'message {event.message}')
+            print(f'from chat {chat_title}')
+            event.message.message = event.message.message + "\n" + "Source feed: " + chat_title + "\n"
+            #print(f'message replaced {str(event.message).replace("SafeAnalyzer | ", chat_title)}')
+         except:
+            print("COULD NOT GET CHAT TITLE")
          print("feed analyzer response")         
          channelId = getSenderIdFromMessage(event.message)
          destination_report_id = await find_report_destination(channelId)
@@ -155,6 +181,7 @@ async def create_groups(client):
    @client.on(events.NewMessage(chats=[buy_signals_group['channel_id']]))
    async def handler(event):         
       print("Forward to trade bot")
+      # time.sleep(2) #TODO add this if neccessary
       await client.send_message(trade_bot, event.message)
 
 
@@ -171,9 +198,15 @@ def getCodeFromFile(delay = 15):
 
 
 async def main(client):
-   await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
+   print(client)
+   try:
+      await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
+      print("client started")
+   except Exception as error:
+      print(f'error starting client {error}')
    async with client:
-      await create_groups(client)
+      interactor =  MaestroInteractor(client)
+      await create_groups(client)      
       await client.run_until_disconnected()
 
 # if __name__ == "__main__":
