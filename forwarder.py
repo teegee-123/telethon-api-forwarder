@@ -29,6 +29,7 @@ report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 class TelegramManager:
    client: TelegramClient
+   sheets: Sheets
    feeds = []
    report_groups = []
    def __init__(self, client: TelegramClient):
@@ -207,8 +208,11 @@ class TelegramManager:
       return code
 
    async def run(self):
-      # # TODO rather run update
-      self.sheets = Sheets()
+      if(self.sheets is None):
+         self.sheets = Sheets()
+
+
+      # # TODO rather run update      
       self.feeds = self.sheets.read_feeds()
       self.report_groups = self.sheets.read_reports()
       print(f'feeds {self.feeds}')

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient, events
 from forwarder import TelegramManager
+from sheets import Sheets
 load_dotenv()
 code_file = os.environ.get("CODE_FILE")
 session = os.environ.get("SESSION")
@@ -48,6 +49,9 @@ def run():
 def run():
      return "PING!"
 
+@app.get("/auth")
+def auth_sheets():
+     manager.sheets = Sheets()
 
 @app.get("/stop")
 async def run():     
