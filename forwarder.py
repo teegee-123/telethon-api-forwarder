@@ -210,16 +210,16 @@ class TelegramManager:
       print(f'feeds {self.feeds}')
       print(f'report_groups {self.report_groups}')
 
-      # try:
-      #    await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
-      #    print("client started")
-      # except Exception as error:
-      #    print(f'error starting client {error}')
-      # async with self.client:
-      #    self.interactor =  MaestroInteractor(self.client)
-      #    await self.create_groups()
-      #    await self.start_listeners()
-      #    await self.client.run_until_disconnected()
+      try:
+         await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
+         print("client started")
+      except Exception as error:
+         print(f'error starting client {error}')
+      async with self.client:
+         self.interactor =  MaestroInteractor(self.client)
+         await self.create_groups()
+         await self.start_listeners()
+         await self.client.run_until_disconnected()
 
 
 
