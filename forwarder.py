@@ -36,7 +36,7 @@ class TelegramManager:
    report_groups = []
    def __init__(self, client: TelegramClient):
       self.client = client
-
+      self.sheets = None
    def get_group_users_to_add(self, group_name: str, groups):
       return list(filter(lambda x: x["name"]==group_name ,groups))[0]["users"]
 
