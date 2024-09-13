@@ -244,7 +244,7 @@ class TelegramManager:
          f = self.sheets.read_feeds()         
          print(f'report_groups {self.report_groups}')
          print(f'feeds {self.feeds}')
-         if(report_groups != r and feeds != f):
+         if(self.report_groups != r and self.feeds != f):
                self.feeds = f
                self.report_groups = r
                print("############################new feeds found############################")
