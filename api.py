@@ -14,7 +14,7 @@ api_hash = os.environ.get("API_HASH")
 
 app = FastAPI()
 client = TelegramClient(session, api_id, api_hash)
-manager = TelegramManager()
+manager = TelegramManager(client)
 
 # from starlette.background import BackgroundTasks
 

@@ -73,8 +73,12 @@ class Sheets:
 
     def auth(self): 
         token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
+
         if os.path.exists(token_file):
-            self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)
+            with open(token_file, "r", encoding="utf-8") as myfile:
+                token = myfile.read()
+            if(token != ""):
+                self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)            
         # If there are no (valid) credentials available, let the user log in.
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
