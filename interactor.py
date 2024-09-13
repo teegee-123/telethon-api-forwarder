@@ -39,6 +39,11 @@ class MaestroInteractor:
          elif(message.message.message.startswith("❌ You do not have any active monitors!")):
             print("clearing trades")
             self.current_trades = []
+         elif(message.message.message.startswith("✅ Sell transaction ")):
+            await self.send_command('wallets')
+            
+            
+
 
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
       async def handler(event: UpdateEditMessage):
