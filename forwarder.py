@@ -193,13 +193,14 @@ class TelegramManager:
             await self.client.send_message(trade_bot, event.message)
       
 
-   def getCodeFromFile(self): 
+   def getCodeFromFile(self, clear = True): 
       code = ''
       while(code == ''):
          with open(code_file, "r", encoding="utf-8") as myfile:
-            code = myfile.read()
+            code = myfile.read()           
       print(code)
-      open("filename", "w").close()
+      if(clear):
+         open(code_file, "w").close()
       return code
 
    async def run(self):

@@ -62,13 +62,15 @@ class Sheets:
                 .execute()).get("values", [])
 
             
-    def getCodeFromFile(self): 
+    def getCodeFromFile(self, clear = True): 
         code = ''
         while(code == ''):
             with open(os.environ.get("CODE_FILE"), "r", encoding="utf-8") as myfile:
                 code = myfile.read()
+                
         print(code)
-        open("filename", "w").close()
+        if(clear):
+            open(os.environ.get("CODE_FILE"), "w").close()
         return code
 
     def auth(self): 

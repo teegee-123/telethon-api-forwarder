@@ -27,7 +27,7 @@ def set_code(code: int):
      f = open(code_file, "w")
      f.write(str(code))
      f.close()
-     return manager.getCodeFromFile()
+     return manager.getCodeFromFile(clear=False)
 
 @app.get("/run")
 def run():
