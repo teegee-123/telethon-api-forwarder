@@ -29,6 +29,15 @@ def set_code(code: int):
      f.close()
      return manager.getCodeFromFile(clear=False)
 
+@app.get("/code")
+def set_code_with_slash(code: str):
+     print(code_file)
+     f = open(code_file, "w")
+     f.write(str(code))
+     f.close()
+     return manager.getCodeFromFile(clear=False)
+
+
 @app.get("/run")
 def run():
      asyncio.run(manager.run())     
