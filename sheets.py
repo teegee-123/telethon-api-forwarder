@@ -109,9 +109,5 @@ class Sheets:
                     token.write(flow.credentials.to_json())
                 
 
-            # Save the credentials for the next run
-            with open(token_file, "w") as token:
-                token.write(self.creds.to_json())
-
-s = Sheets()
-s.read()
+# s = Sheets()
+# s.read()

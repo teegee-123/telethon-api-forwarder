@@ -2,7 +2,6 @@ import os
 import asyncio 
 from fastapi import FastAPI
 from dotenv import load_dotenv
-from forwarder import main, getCodeFromFile
 from telethon.sync import TelegramClient, events
 from forwarder import TelegramManager
 load_dotenv()
@@ -32,7 +31,7 @@ def set_code(code: int):
 
 @app.get("/run")
 def run():
-     #asyncio.run(manager.run())     
+     asyncio.run(manager.run())     
      return "Started"
 
 
