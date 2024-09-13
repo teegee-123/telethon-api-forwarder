@@ -75,7 +75,7 @@ class Sheets:
 
     def auth(self): 
         token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
-
+        print(token_file)
         if os.path.exists(token_file):
             with open(token_file, "r", encoding="utf-8") as myfile:
                 token = myfile.read()
