@@ -106,6 +106,7 @@ class Sheets:
                 code = self.getCodeFromFile()
                 flow.fetch_token(code=code)
                 with open(token_file, "w") as token:
+                    print(flow.credentials.to_json())
                     token.write(flow.credentials.to_json())
                 
 
