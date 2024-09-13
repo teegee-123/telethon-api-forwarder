@@ -249,8 +249,8 @@ class TelegramManager:
                report_groups = r
                print("############################new feeds found############################")
                await self.create_groups()
-      except:
-         print("Failed to read sheets")
+      except Exception as error:
+         print(f'Failed to read sheets {error}')
          self.sheets.auth()
 
 
