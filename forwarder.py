@@ -132,7 +132,7 @@ class TelegramManager:
       print("CONNECTED")
       await self.create_feed_groups()
       await self.create_report_groups()
-      await self.create_buy_signals_group()
+      # await self.create_buy_signals_group()
 
 
 
@@ -220,6 +220,7 @@ class TelegramManager:
          print(f'error starting client {error}')
       async with self.client:
          self.interactor =  MaestroInteractor(self.client)
+         await self.create_buy_signals_group()
          await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
