@@ -187,6 +187,7 @@ class TelegramManager:
       # forward from buy signals group to trade bot
       @self.client.on(events.NewMessage(chats=[buy_signals_group['channel_id']]))
       async def handler(event):
+         print(event.message.message)
          if(event.message.message.startswith("update")):
             print("updating feeds")
             await self.check_for_new_feeds()
@@ -221,6 +222,8 @@ class TelegramManager:
       async with self.client:
          self.interactor =  MaestroInteractor(self.client)
          await self.create_buy_signals_group()
+         self.sheets = Sheets()
+         self.sheets.auth()
          await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
