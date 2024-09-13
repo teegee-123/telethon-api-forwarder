@@ -32,7 +32,7 @@ class Sheets:
         for feed in feeds:
             if(not feed[0] or not feed[1] or not feed[2]):
                 print(f'cannot parse feed {feed}')                
-            mapped_feed = { "id": feed[0], "name": feed[1], "users": json.loads(feed[2]) }
+            mapped_feed = { "id": int(feed[0]), "name": feed[1], "users": json.loads(feed[2]) }
             mapped_feeds.append(mapped_feed)
         
         return mapped_feeds
