@@ -74,42 +74,45 @@ class Sheets:
         return code
 
     def auth(self): 
-        token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
-        print(token_file)
-        if os.path.exists(token_file):
-            with open(token_file, "r", encoding="utf-8") as myfile:
-                token = myfile.read()
-            if(token != ""):
-                self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)            
-        # If there are no (valid) credentials available, let the user log in.
-        if not self.creds or not self.creds.valid:
-            if self.creds and self.creds.expired and self.creds.refresh_token:
-                self.creds.refresh(Request())
-            else:                
-                config = {
-                        "installed": {
-                            "client_id": os.environ.get("CLIENT_ID"),
-                            "project_id": os.environ.get("PROJECT_NAME"),
-                            "client_secret": os.environ.get("CLIENT_SECRET"),
-                            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                            "token_uri": "https://oauth2.googleapis.com/token",
-                            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                            #TODO REMOVE
-                            # "redirect_uris": [
-                            #     "http://localhost"
-                            # ]
+        try:
+            token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
+            print(token_file)
+            if os.path.exists(token_file):
+                with open(token_file, "r", encoding="utf-8") as myfile:
+                    token = myfile.read()
+                if(token != ""):
+                    self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)            
+            # If there are no (valid) credentials available, let the user log in.
+            if not self.creds or not self.creds.valid:
+                if self.creds and self.creds.expired and self.creds.refresh_token:
+                    self.creds.refresh(Request())
+                else:                
+                    config = {
+                            "installed": {
+                                "client_id": os.environ.get("CLIENT_ID"),
+                                "project_id": os.environ.get("PROJECT_NAME"),
+                                "client_secret": os.environ.get("CLIENT_SECRET"),
+                                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                                "token_uri": "https://oauth2.googleapis.com/token",
+                                "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+                                #TODO REMOVE
+                                # "redirect_uris": [
+                                #     "http://localhost"
+                                # ]
+                            }
                         }
-                    }
-                flow = InstalledAppFlow.from_client_config(client_config=config , scopes=SCOPES)
-                #self.creds = flow.run_console()
-                flow.redirect_uri = flow._OOB_REDIRECT_URI
-                auth_url, _ = flow.authorization_url()
-                print(auth_url)
-                code = self.getCodeFromFile()
-                flow.fetch_token(code=code)
-                with open(token_file, "w") as token:
-                    print(flow.credentials.to_json())
-                    token.write(flow.credentials.to_json())
+                    flow = InstalledAppFlow.from_client_config(client_config=config , scopes=SCOPES)
+                    #self.creds = flow.run_console()
+                    flow.redirect_uri = flow._OOB_REDIRECT_URI
+                    auth_url, _ = flow.authorization_url()
+                    print(auth_url)
+                    code = self.getCodeFromFile()
+                    flow.fetch_token(code=code)
+                    with open(token_file, "w") as token:
+                        print(flow.credentials.to_json())
+                        token.write(flow.credentials.to_json())
+        except:
+            print("Could not auth sheets")
                 
 
 # s = Sheets()
