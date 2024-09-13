@@ -29,6 +29,8 @@ report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 class TelegramManager:
    client: TelegramClient
+   feeds = []
+   report_groups = []
    def __init__(self, client: TelegramClient):
       self.client = client
 
@@ -218,9 +220,9 @@ class TelegramManager:
          print(f'error starting client {error}')
       async with self.client:
          self.interactor =  MaestroInteractor(self.client)
+         await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
-         await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.client.run_until_disconnected()
 
 
