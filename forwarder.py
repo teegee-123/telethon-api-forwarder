@@ -204,23 +204,24 @@ class TelegramManager:
       return code
 
    async def run(self):
-      # TODO rather run update
-      self.sheets = Sheets()
-      self.feeds = self.sheets.read_feeds()
-      self.report_groups  = self.sheets.read_reports()
-      print(f'feeds {self.feeds}')
-      print(f'report_groups {self.report_groups}')
+      # # TODO rather run update
+      # self.sheets = Sheets()
+      # self.feeds = self.sheets.read_feeds()
+      # self.report_groups  = self.sheets.read_reports()
+      # print(f'feeds {self.feeds}')
+      # print(f'report_groups {self.report_groups}')
 
-      # try:
-      #    await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
-      #    print("client started")
-      # except Exception as error:
-      #    print(f'error starting client {error}')
-      # async with self.client:
-      #    self.interactor =  MaestroInteractor(self.client)
-      #    await self.create_groups()
-      #    await self.start_listeners()
-      #    await self.client.run_until_disconnected()
+      try:
+         await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
+         print("client started")
+      except Exception as error:
+         print(f'error starting client {error}')
+      async with self.client:
+         self.interactor =  MaestroInteractor(self.client)
+         await self.create_groups()
+         await self.start_listeners()
+         await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
+         await self.client.run_until_disconnected()
 
 
 
@@ -228,7 +229,9 @@ class TelegramManager:
    async def check_for_new_feeds(self):
       try:
          r = self.sheets.read_reports()
-         f = self.sheets.read_feeds()
+         f = self.sheets.read_feeds()         
+         print(f'report_groups {report_groups}')
+         print(f'feeds {feeds}')
          if(report_groups != r and feeds != f):
                feeds = f
                report_groups = r
