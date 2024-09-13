@@ -81,7 +81,9 @@ class Sheets:
                 with open(token_file, "r", encoding="utf-8") as myfile:
                     token = myfile.read()
                 if(token != ""):
+                    print("token not empty")
                     self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)            
+                print("token empty")
             # If there are no (valid) credentials available, let the user log in.
             if not self.creds or not self.creds.valid:
                 if self.creds and self.creds.expired and self.creds.refresh_token:
@@ -109,7 +111,7 @@ class Sheets:
                     code = self.getCodeFromFile()
                     flow.fetch_token(code=code)
                     with open(token_file, "w") as token:
-                        print(flow.credentials.to_json())
+                        print(f'token written {flow.credentials.to_json()}')
                         token.write(flow.credentials.to_json())
         except:
             print("Could not auth sheets")
