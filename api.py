@@ -32,7 +32,7 @@ def set_code(code: int):
 
 @app.get("/run")
 def run():
-     #asyncio.run(manager.run())     
+     asyncio.run(manager.run())     
      return "Started"
 
 

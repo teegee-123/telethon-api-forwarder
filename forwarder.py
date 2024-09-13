@@ -30,12 +30,6 @@ report_group_name = os.environ.get("REPORT_GROUP_NAME")
 class TelegramManager:
    client: TelegramClient
    def __init__(self, client: TelegramClient):
-      self.sheets = Sheets()
-      self.feeds = self.sheets.read_feeds()
-      self.report_groups  = self.sheets.read_reports()
-      print(f'feeds {self.feeds}')
-      print(f'report_groups {self.report_groups}')
-
       self.client = client
 
    def get_group_users_to_add(self, group_name: str, groups):
@@ -208,7 +202,14 @@ class TelegramManager:
       open("filename", "w").close()
       return code
 
-   async def run(self):      
+   async def run(self):
+      # TODO rather run update
+      self.sheets = Sheets()
+      self.feeds = self.sheets.read_feeds()
+      self.report_groups  = self.sheets.read_reports()
+      print(f'feeds {self.feeds}')
+      print(f'report_groups {self.report_groups}')
+
       try:
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
