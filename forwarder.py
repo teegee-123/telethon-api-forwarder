@@ -24,6 +24,8 @@ trade_bot = os.environ.get("TRADEBOTNAME")
 buy_signals_group = json.loads(os.environ.get("BUYSIGNALSGROUP"))
 report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
+token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")#.replace('./', '')
+
 
 
 
@@ -210,7 +212,9 @@ class TelegramManager:
    async def run(self):
       if(self.sheets is None):
          self.sheets = Sheets()
-
+      print("sheets initialized")
+      with open(token_file, 'r') as token:
+         print(token.read())
 
       # # TODO rather run update      
       self.feeds = self.sheets.read_feeds()
