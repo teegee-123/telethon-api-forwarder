@@ -208,11 +208,11 @@ class TelegramManager:
 
    async def run(self):
       # # TODO rather run update
-      # self.sheets = Sheets()
-      # self.feeds = self.sheets.read_feeds()
-      # self.report_groups  = self.sheets.read_reports()
-      # print(f'feeds {self.feeds}')
-      # print(f'report_groups {self.report_groups}')
+      self.sheets = Sheets()
+      self.feeds = self.sheets.read_feeds()
+      self.report_groups = self.sheets.read_reports()
+      print(f'feeds {self.feeds}')
+      print(f'report_groups {self.report_groups}')
 
       try:
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
@@ -222,7 +222,6 @@ class TelegramManager:
       async with self.client:
          self.interactor =  MaestroInteractor(self.client)
          await self.create_buy_signals_group()
-         self.sheets = Sheets()
          await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
