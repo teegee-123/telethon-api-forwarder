@@ -223,7 +223,6 @@ class TelegramManager:
          self.interactor =  MaestroInteractor(self.client)
          await self.create_buy_signals_group()
          self.sheets = Sheets()
-         self.sheets.auth()
          await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
