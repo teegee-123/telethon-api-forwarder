@@ -242,11 +242,11 @@ class TelegramManager:
       try:
          r = self.sheets.read_reports()
          f = self.sheets.read_feeds()         
-         print(f'report_groups {report_groups}')
-         print(f'feeds {feeds}')
+         print(f'report_groups {self.report_groups}')
+         print(f'feeds {self.feeds}')
          if(report_groups != r and feeds != f):
-               feeds = f
-               report_groups = r
+               self.feeds = f
+               self.report_groups = r
                print("############################new feeds found############################")
                await self.create_groups()
       except Exception as error:
