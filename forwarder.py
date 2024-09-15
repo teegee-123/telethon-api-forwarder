@@ -24,8 +24,8 @@ trade_bot = os.environ.get("TRADEBOTNAME")
 buy_signals_group = json.loads(os.environ.get("BUYSIGNALSGROUP"))
 report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
-token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")#.replace('./', '')
-
+token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
+print(token_file)
 
 
 
@@ -34,9 +34,11 @@ class TelegramManager:
    sheets: Sheets
    feeds = []
    report_groups = []
+   handlers = []
    def __init__(self, client: TelegramClient):
       self.client = client
-
+      self.sheets = Sheets()      
+      self.handlers = []
    def get_group_users_to_add(self, group_name: str, groups):
       return list(filter(lambda x: x["name"]==group_name ,groups))[0]["users"]
 
@@ -117,7 +119,7 @@ class TelegramManager:
    async def create_report_groups(self):
       for report_group in self.report_groups:
          group_name = report_group["name"]      
-         report_group["report_channel_id"] = await self.create_report_group(group_name, 'reports for addChannelNames')
+         report_group["report_channel_id"] = await self.create_report_group(group_name, f'reports for {report_group["feeds"]}')
          for feed in report_group["feeds"]:
             feed["report_channel_id"] = report_group["report_channel_id"]
             feed["channel_id"] = await self.find_group_by_name(feed["name"])
@@ -138,11 +140,7 @@ class TelegramManager:
       # await self.create_buy_signals_group()
 
 
-
-
-   async def start_listeners(self):
-      print("Listening...")
-      await self.client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
+   async def source_to_feed_listener(self):
       feed_sources = list(map(lambda x: x['id'], self.feeds))
       #forward from sources to feed groups
       @self.client.on(events.NewMessage(chats=feed_sources))
@@ -161,9 +159,11 @@ class TelegramManager:
             print('lookup not defined')
 
          await self.client.send_message(destination['channel_id'], event.message)
-      
+      self.handlers.append(handler)
+
+   async def feed_to_report_listener(self):
       feed_groups = list(map(lambda x: x['channel_id'], self.feeds))
-      #forward from feed groups to report group
+      #forward from feed groups to report group      
       @self.client.on(events.NewMessage(chats=feed_groups))
       async def handler(event):
          if("SafeAnalyzer" in str(event.message)):
@@ -184,73 +184,82 @@ class TelegramManager:
                await self.client.send_message(destination_report_id, event.message)
             else: 
                print(f'could not find a destination for {channelId}')
-               return 
-         
+               return    
+      self.handlers.append(handler)
 
+   async def buy_signals_to_trade_bot_listener(self):
       # forward from buy signals group to trade bot
-      @self.client.on(events.NewMessage(chats=[buy_signals_group['channel_id']]))
-      async def handler(event):
-         print(event.message.message)
-         if(event.message.message.startswith("update")):
+      @self.client.on(event=events.NewMessage(chats=[buy_signals_group['channel_id']]))
+      async def handler(event):         
+         if(event.message.message.lower().startswith("update")):
             print("updating feeds")
             await self.check_for_new_feeds()
          else:
             print("Forward to trade bot")
-            await self.client.send_message(trade_bot, event.message)
-      
+            await self.client.send_message(trade_bot, event.message)      
+      self.handlers.append(handler)
+   
+   async def start_listeners(self):            
+      print("Listening...")
+      for h in self.handlers:
+         self.client.remove_event_handler(h)
 
-   def getCodeFromFile(self, clear = True): 
+      for h in self.interactor.handlers:
+         self.interactor.client.remove_event_handler(h)
+
+      await self.client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
+      await self.source_to_feed_listener()
+      await self.feed_to_report_listener()
+      await self.buy_signals_to_trade_bot_listener()
+
+
+   def getCodeFromFile(self): 
       code = ''
       while(code == ''):
          with open(code_file, "r", encoding="utf-8") as myfile:
             code = myfile.read()           
       print(code)
-      if(clear):
-         open(code_file, "w").close()
       return code
 
-   async def run(self):
-      if(self.sheets is None):
-         self.sheets = Sheets()
-      print("sheets initialized")
-      with open(token_file, 'r') as token:
-         print(token.read())
-
-      # # TODO rather run update      
-      self.feeds = self.sheets.read_feeds()
+   async def run(self, send_update = False):
+      await self.sheets.auth()
       self.report_groups = self.sheets.read_reports()
-      print(f'feeds {self.feeds}')
-      print(f'report_groups {self.report_groups}')
-
+      self.feeds = self.sheets.read_feeds()
       try:
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
       except Exception as error:
          print(f'error starting client {error}')
-      async with self.client:
-         self.interactor =  MaestroInteractor(self.client)
+      async with self.client:         
+         self.interactor =  MaestroInteractor(self.client, self.sheets)
          await self.create_buy_signals_group()
-         await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
+         if(send_update):
+            await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()
          await self.start_listeners()
          await self.client.run_until_disconnected()
 
 
 
-   ######### TODO REPLACE WITH AN EVENT FROM THE SHEET
    async def check_for_new_feeds(self):
       try:
          r = self.sheets.read_reports()
-         f = self.sheets.read_feeds()         
-         print(f'report_groups {report_groups}')
-         print(f'feeds {feeds}')
-         if(report_groups != r and feeds != f):
-               feeds = f
-               report_groups = r
-               print("############################new feeds found############################")
-               await self.create_groups()
+         f = self.sheets.read_feeds()
+         i = self.sheets.read_interactor_stop_loss()         
+         print(f'report_groups {self.report_groups}')
+         print(f'feeds {self.feeds}')
+         self.feeds = f
+         self.report_groups = r         
+         self.interactor.trailing_stop = i         
+         #await self.create_groups()
+         await self.client.send_message(buy_signals_group["channel_id"], f'''Complete update \n
+                                         Feeds: {self.feeds}\n 
+                                         Reports: {self.report_groups}\n
+                                         Stop Loss: {self.interactor.trailing_stop}''')         
       except Exception as error:
          print(f'Failed to read sheets {error}')
-         self.sheets.auth()
+         await self.sheets.auth()
+
+      await self.run(send_update=False)
 
 

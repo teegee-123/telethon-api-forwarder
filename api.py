@@ -16,27 +16,19 @@ app = FastAPI()
 client = TelegramClient(session, api_id, api_hash)
 manager = TelegramManager(client)
 
-# from starlette.background import BackgroundTasks
+from starlette.background import BackgroundTasks
 
-# @app.on_event("startup")
-# def startup_event():
-#      asyncio.run(main(client))
 
-@app.get("/code/{code}")
-def set_code(code: int):
-     print(code_file)
-     f = open(code_file, "w")
-     f.write(str(code))
-     f.close()
-     return manager.getCodeFromFile(clear=False)
 
 @app.get("/code")
 def set_code_with_slash(code: str):
      print(code_file)
-     f = open(code_file, "w")
-     f.write(str(code))
-     f.close()
-     return manager.getCodeFromFile(clear=False)
+     with open(code_file, 'w') as file:
+          print(code)
+          file.write(code)          
+     code = manager.getCodeFromFile()
+     open(code_file, 'w').close()
+     return code
 
 
 @app.get("/run")
@@ -48,10 +40,6 @@ def run():
 @app.get("/ping")
 def run():
      return "PING!"
-
-@app.get("/auth")
-def auth_sheets():
-     manager.sheets = Sheets()
 
 @app.get("/stop")
 async def run():     

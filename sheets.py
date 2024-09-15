@@ -7,6 +7,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import json
 from dotenv import load_dotenv, dotenv_values 
+import asyncio 
 
 load_dotenv()
 
@@ -20,14 +21,19 @@ class Sheets:
     spreadsheet_id = os.environ.get("SPREADSHEET_ID")
     feeds_range = "feeds!A:C"
     reports_range = "reports!A:C"
+    interactor_range = "interactor!A:A"
     creds = None
-    def __init__(self): 
-        self.auth()
+    # def __init__(self): 
+    #     asyncio.run( self.auth())
+
+    def run(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.auth())
 
     def read_feeds(self):
         feed_data = self.get_sheet_data(self.feeds_range, self.creds)
         feeds = feed_data[1:]
-        print("feeds")
+        print("read feeds sheet")
         mapped_feeds = []
         for feed in feeds:
             if(not feed[0] or not feed[1] or not feed[2]):
@@ -41,7 +47,7 @@ class Sheets:
         report_data = self.get_sheet_data(self.reports_range, self.creds)
         
         reports = report_data[1:]
-        print("reports")            
+        print("read reports sheet")            
         mapped_reports = []
         for report in reports:
             if(not report[0] or not report[1] or not report[2]):
@@ -53,7 +59,17 @@ class Sheets:
             mapped_reports.append(mapped_report)
         
         return mapped_reports
+
+
+    def read_interactor_stop_loss(self):
+        report_data = self.get_sheet_data(self.interactor_range, self.creds)
         
+        stoplossData = report_data[1:][0][0]
+        print("read interactor sheet")            
+        print(f"new stop loss {stoplossData}")
+        return int(stoplossData)
+        
+
     def get_sheet_data(self, range, creds):
         service = build("sheets", "v4", credentials=creds)
         sheet = service.spreadsheets()
@@ -62,30 +78,31 @@ class Sheets:
                 .execute()).get("values", [])
 
             
-    def getCodeFromFile(self, clear = True): 
+    async def getCodeFromFile(self): 
         code = ''
         while(code == ''):
             with open(os.environ.get("CODE_FILE"), "r", encoding="utf-8") as myfile:
                 code = myfile.read()
                 
         print(code)
-        if(clear):
-            open(os.environ.get("CODE_FILE"), "w").close()
         return code
 
-    def auth(self): 
+    async def auth(self): 
         try:
             token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")#.replace('./', '')
             print(token_file)
             if os.path.exists(token_file):
                 with open(token_file, "r", encoding="utf-8") as myfile:
                     token = myfile.read()
-                if(token != ""):
+                if(token != "" and token != '{}'):
                     print("token not empty")
                     self.creds = Credentials.from_authorized_user_file(token_file, SCOPES)            
+                    print(self.creds.to_json())
+                    print(self.creds.valid)
+            else:
                 print("token empty")
             # If there are no (valid) credentials available, let the user log in.
-            if not self.creds or not self.creds.valid:
+            if not self.creds:
                 if self.creds and self.creds.expired and self.creds.refresh_token:
                     self.creds.refresh(Request())
                 else:                
@@ -108,10 +125,11 @@ class Sheets:
                     flow.redirect_uri = flow._OOB_REDIRECT_URI
                     auth_url, _ = flow.authorization_url()
                     print(auth_url)
-                    code = self.getCodeFromFile()
+                    code = await self.getCodeFromFile()
                     flow.fetch_token(code=code)
                     with open(token_file, "w") as token:
                         print(f'token written {flow.credentials.to_json()}')
+                        self.creds = flow.credentials
                         token.write(flow.credentials.to_json())
         except:
             print("Could not auth sheets")
