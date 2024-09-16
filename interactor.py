@@ -72,15 +72,31 @@ class MaestroInteractor:
                primary_trade = {"name": primary_trade_name, "percent": primary_trade_percent, "stop_loss": primary_trade_stop_loss} # TODO update stop loss
                self.current_trades.append(primary_trade)
             
+            #tier 1
+            if(primary_trade["percent"] > 14 and  primary_trade["percent"] <= 24 and primary_trade["stop_loss"] < 14):
+               print(f'setting new Tiered stop loss, old: {primary_trade["stop_loss"]} new: {14}')
+               print(f'setting new Tiered SL prev: {primary_trade["stop_loss"]}, new: {14}')
+               primary_trade["stop_loss"] = 14
+               print("clicking stop loss button")
+               await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
+            #tier 2
+            elif(primary_trade["percent"] > 20 and  primary_trade["percent"] <= 30 and primary_trade["stop_loss"] < 20):
+               print(f'setting new Tiered stop loss, old: {primary_trade["stop_loss"]} new: {20}')
+               print(f'setting new Tiered SL prev: {primary_trade["stop_loss"]}, new: {20}')
+               primary_trade["stop_loss"] = 20
+               print("clicking stop loss button")
+               await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
+
             # setting new stop loss
-            if(primary_trade["stop_loss"] < primary_trade["percent"] + self.trailing_stop):
+            elif(primary_trade["stop_loss"] < primary_trade["percent"] + self.trailing_stop):
                print(f'setting new stop loss, old: {primary_trade["stop_loss"]} new: {primary_trade["percent"] + self.trailing_stop}')
                print(f'setting new SL prev: {primary_trade["stop_loss"]}, new: {primary_trade["percent"] + self.trailing_stop}')
                primary_trade["stop_loss"] = primary_trade["percent"] + self.trailing_stop
                print("clicking stop loss button")
                await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
+            
+            # iterate trades
             else:
-               # iterate trades
                print(f'No need to set Stop loss, old: {primary_trade["stop_loss"]} new: {primary_trade["percent"] + self.trailing_stop}')
                print(f'Navigating to next trade. Current trade: {primary_trade_name}')
                nav_right_button = self.get_right_nav_button(self.buttons)
