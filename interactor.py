@@ -80,10 +80,10 @@ class MaestroInteractor:
                print("clicking stop loss button")
                await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
             #tier 2
-            elif(primary_trade["percent"] > 20 and  primary_trade["percent"] <= 25 and primary_trade["stop_loss"] < 20):
-               print(f'setting new Tiered stop loss, old: {primary_trade["stop_loss"]} new: {20}')
-               print(f'setting new Tiered SL prev: {primary_trade["stop_loss"]}, new: {20}')
-               primary_trade["stop_loss"] = 20
+            elif(primary_trade["percent"] > 24 and  primary_trade["percent"] <= 30 and primary_trade["stop_loss"] < 24):
+               print(f'setting new Tiered stop loss, old: {primary_trade["stop_loss"]} new: {24}')
+               print(f'setting new Tiered SL prev: {primary_trade["stop_loss"]}, new: {24}')
+               primary_trade["stop_loss"] = 24
                print("clicking stop loss button")
                await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
 
