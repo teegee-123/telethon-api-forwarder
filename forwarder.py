@@ -199,19 +199,22 @@ class TelegramManager:
             await self.client.send_message(trade_bot, event.message)      
       self.handlers.append(handler)
    
-   async def start_listeners(self):            
-      print("Listening...")
+   async def start_listeners(self):   
+      print(f'Handlers registered before: {len(self.handlers)}')         
       for h in self.handlers:
+         print(f"removing listener {h}")
          self.client.remove_event_handler(h)
 
       for h in self.interactor.handlers:
+         print(f"removing interactor listener {h}")
          self.interactor.client.remove_event_handler(h)
 
       await self.client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
       await self.source_to_feed_listener()
       await self.feed_to_report_listener()
       await self.buy_signals_to_trade_bot_listener()
-
+      print("Listening...")
+      print(f'Handlers registered: {len(self.handlers)}')
 
    def getCodeFromFile(self): 
       code = ''
