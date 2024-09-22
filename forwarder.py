@@ -198,6 +198,7 @@ def getCodeFromFile(delay = 15):
 
 
 import threading
+import asyncio
 
 def set_interval(func, sec):
     def func_wrapper():
@@ -207,6 +208,7 @@ def set_interval(func, sec):
     t.start()
     return t
 
+
 async def main(client):
    print(client)
    try:
@@ -215,7 +217,8 @@ async def main(client):
    except Exception as error:
       print(f'error starting client {error}')
    async with client:
-      interactor =  MaestroInteractor(client)
+      interactor =  MaestroInteractor(client)      
+      asyncio.run(set_interval(lambda: send_pump(client), 3))
       # await set_interval(lambda: send_pump(client), 15)
       await create_groups(client)      
       await client.run_until_disconnected()
