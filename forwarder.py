@@ -199,10 +199,10 @@ def getCodeFromFile(delay = 15):
 
 import threading
 
-async def set_interval(func, sec):
-    async def func_wrapper():
-        await set_interval(func, sec)
-        await func()
+def set_interval(func, sec):
+    def func_wrapper():
+        set_interval(func, sec)
+        func()
     t = threading.Timer(sec, func_wrapper)
     t.start()
     return t
