@@ -216,11 +216,11 @@ async def main(client):
       print(f'error starting client {error}')
    async with client:
       interactor =  MaestroInteractor(client)
-      await set_interval(lambda: send_pump(), 15)
+      await set_interval(lambda: send_pump(client), 15)
       await create_groups(client)      
       await client.run_until_disconnected()
    
-   def send_pump():
+   def send_pump(client):
       print("Sending pump command")
       client.send_message('Pfscrapedevbot', f'/pump')
 
