@@ -128,6 +128,7 @@ class TelegramManager:
 
    async def create_buy_signals_group(self):
       group_name = buy_signals_group["name"]
+      print(f"Creating Buy signals group {group_name}")
       all_report_bots = list(itertools.chain.from_iterable(map(lambda x: x["users"], self.report_groups)))
       buy_signals_group["channel_id"] = await self.create_group(group_name, all_report_bots, 'Signals', f'Buy signals will be forwarded to {trade_bot}')
 
