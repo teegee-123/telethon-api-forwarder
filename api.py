@@ -48,4 +48,8 @@ async def run():
      return "Stopped"
 
 
+@app.get("/send/{command}")
+async def send(command: str):
+     await client.send_message('Pfscrapedevbot', f'/{command}')
+     return "sent"
 
