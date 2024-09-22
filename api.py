@@ -50,6 +50,7 @@ async def run():
 
 @app.get("/send/{command}")
 async def send(command: str):
-     await client.send_message('Pfscrapedevbot', f'/{command}')
-     return "sent"
+     async with client:
+          await client.send_message('Pfscrapedevbot', f'/{command}')
+          return "sent"
 
