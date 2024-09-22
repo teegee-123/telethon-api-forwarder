@@ -203,7 +203,7 @@ async def set_interval(func, sec):
     async def func_wrapper():
         await set_interval(func, sec)
         await func()
-    t = threading.Timer(sec, await func_wrapper)
+    t = threading.Timer(sec, func_wrapper)
     t.start()
     return t
 
