@@ -199,11 +199,11 @@ def getCodeFromFile(delay = 15):
 
 import threading
 
-def set_interval(func, sec):
+async def set_interval(func, sec):
     async def func_wrapper():
-        set_interval(func, sec)
+        await set_interval(func, sec)
         await func()
-    t = threading.Timer(sec, func_wrapper)
+    t = threading.Timer(sec, await func_wrapper)
     t.start()
     return t
 
@@ -216,7 +216,7 @@ async def main(client):
       print(f'error starting client {error}')
    async with client:
       interactor =  MaestroInteractor(client)
-      set_interval(lambda: send_pump(), 15)
+      await set_interval(lambda: send_pump(), 15)
       await create_groups(client)      
       await client.run_until_disconnected()
    
