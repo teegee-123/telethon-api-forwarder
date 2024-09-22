@@ -8,20 +8,24 @@ from telethon.tl.functions.channels import CreateChannelRequest, InviteToChannel
 from telethon.tl.types import KeyboardButtonCallback
 from telethon.tl.types import Message
 from telethon.tl.types import UpdateEditMessage, UpdateNewMessage
+
+from sheets import Sheets
 load_dotenv()
 
 class MaestroInteractor:   
-   def __init__(self, client: TelegramClient):
+   
+   def __init__(self, client: TelegramClient, sheets: Sheets):
       self.client = client
+      self.sheets = sheets
       self.maestro_username = os.environ.get("TRADEBOTNAME")
       self.maestro_id = int(os.environ.get("MAESTRO_ID"))
-      self.trailing_stop = int(os.environ.get("TRAILING_STOP"))      
+      self.trailing_stop = self.sheets.read_interactor_stop_loss()
       self.sleep_period = int(os.environ.get("SLEEP_TIME"))
       
       self.current_monitor: UpdateEditMessage = None
       self.buttons: list[{"name", "data"}] = [] 
       self.current_trades:list[{"name", "stop_loss", "percent"}] = []
-
+      self.handlers = []
       #monitor_updated_filter=lambda x: type(x) is UpdateEditMessage and x.message.message.startswith("📌 Primary Trade") #and x.message.peer_id.user_id == self.maestro_id
       # monitor_messaged_filter=lambda x: type(x.original_update) is UpdateNewMessage and x.original_update.message.message.startswith("📌 Primary Trade") and x.original_update.message.peer_id.user_id == self.maestro_id
 
@@ -39,6 +43,12 @@ class MaestroInteractor:
          elif(message.message.message.startswith("❌ You do not have any active monitors!")):
             print("clearing trades")
             self.current_trades = []
+         elif(message.message.message.startswith("✅ Sell transaction ")):
+            await self.send_command('wallets')
+      self.handlers.append(onMaestroMonitorShown)
+            
+            
+
 
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
       async def handler(event: UpdateEditMessage):
@@ -102,7 +112,8 @@ class MaestroInteractor:
                nav_right_button = self.get_right_nav_button(self.buttons)
                await event.message.click(text=nav_right_button["text"])
                time.sleep(self.sleep_period)
-            
+      self.handlers.append(handler)
+           
 
      
    
@@ -137,28 +148,3 @@ class MaestroInteractor:
          return list(map(lambda x: x['text'] , buttons)).index(text)
       except:
          return None
-
-
-
-# phone = os.environ.get("PHONE")
-# session = os.environ.get("SESSION")
-# api_id = os.environ.get("API_ID") 
-# api_hash = os.environ.get("API_HASH")
-# code_file = os.environ.get("CODE_FILE")
-
-
-
-
-
-
-
-
-# async def main(client: TelegramClient):
-#    interactor =  MaestroInteractor(client)
-#    await client.start(phone=phone, code_callback= lambda : getCodeFromFile(15))
-#    async with client:
-#       await interactor.send_command(client, 'monitor')
-#       await client.run_until_disconnected()      
-#       #await client.disconnect()      
-   
-# asyncio.run(main(TelegramClient(session, api_id, api_hash)))
