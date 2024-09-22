@@ -216,9 +216,13 @@ async def main(client):
       print(f'error starting client {error}')
    async with client:
       interactor =  MaestroInteractor(client)
-      set_interval(lambda: client.send_message('Pfscrapedevbot', f'/pump'), 120)
+      set_interval(lambda: await send_pump(), 5)
       await create_groups(client)      
       await client.run_until_disconnected()
+   
+   async def send_pump():
+      print("Sending pump command")
+      await client.send_message('Pfscrapedevbot', f'/pump')
 
 # if __name__ == "__main__":
 #     asyncio.run(main(TelegramClient(session, api_id, api_hash)))
