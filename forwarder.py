@@ -197,18 +197,6 @@ def getCodeFromFile(delay = 15):
 
 
 
-import threading
-import asyncio
-
-def set_interval(func, sec):
-    def func_wrapper():
-        set_interval(func, sec)
-        func()
-    t = threading.Timer(sec, func_wrapper)
-    t.start()
-    return t
-
-
 async def main(client):
    print(client)
    try:
@@ -218,14 +206,8 @@ async def main(client):
       print(f'error starting client {error}')
    async with client:
       interactor =  MaestroInteractor(client)      
-      asyncio.run(set_interval(lambda: send_pump(client), 3))
-      # await set_interval(lambda: send_pump(client), 15)
       await create_groups(client)      
       await client.run_until_disconnected()
-
-def send_pump(client):
-   print("Sending pump command")
-   client.send_message('Pfscrapedevbot', f'/pump')
 
 # if __name__ == "__main__":
 #     asyncio.run(main(TelegramClient(session, api_id, api_hash)))
