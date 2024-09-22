@@ -216,7 +216,7 @@ async def main(client):
       print(f'error starting client {error}')
    async with client:
       interactor =  MaestroInteractor(client)
-      set_interval(lambda: await send_pump(), 5)
+      set_interval(lambda: send_pump(), 5)
       await create_groups(client)      
       await client.run_until_disconnected()
    
