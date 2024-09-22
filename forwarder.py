@@ -220,9 +220,9 @@ async def main(client):
       await create_groups(client)      
       await client.run_until_disconnected()
    
-   def send_pump(client):
-      print("Sending pump command")
-      client.send_message('Pfscrapedevbot', f'/pump')
+def send_pump(client):
+   print("Sending pump command")
+   client.send_message('Pfscrapedevbot', f'/pump')
 
 # if __name__ == "__main__":
 #     asyncio.run(main(TelegramClient(session, api_id, api_hash)))
