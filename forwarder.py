@@ -144,6 +144,20 @@ class TelegramManager:
       await self.create_report_groups()
       # await self.create_buy_signals_group()
 
+   async def simple_forwarder_listeners(self):
+      source_map = self.sheets.read_simple_feeds()
+      sources = [i["source"] for i in source_map]
+      print(sources)
+      @self.client.on(events.NewMessage(chats=sources))
+      async def handler(event):
+         source_id = self.getSenderIdFromMessage(event)
+         destinations = [i["destination"] for i in source_map if i["source"]==source_id]
+         print(destinations)
+         for destination in destinations:
+            print(f"sending simple forward")
+            await self.client.send_message(destination, event.message)
+      self.handlers.append(handler)
+
 
    async def source_to_feed_listener(self):
       feed_sources = list(map(lambda x: x['id'], self.feeds))
@@ -216,6 +230,7 @@ class TelegramManager:
       await self.client.send_message(buy_signals_group["channel_id"], f'Started api service1 {datetime.datetime.now()}')
       await self.source_to_feed_listener()
       await self.feed_to_report_listener()
+      await self.simple_forwarder_listeners()
       await self.buy_signals_to_trade_bot_listener()
       print("Listening...")
       print(f'Handlers registered: {len(self.handlers)}')
@@ -264,16 +279,7 @@ class TelegramManager:
 
          self.feeds = f
          self.report_groups = r
-         # self.interactor = MaestroInteractor(self.client, self.sheets)
-         # self.interval = IntervalHandler( self.client, self.sheets)
-        
-         # self.interactor = MaestroInteractor(self.client, self.sheets)
-         # self.interval = IntervalHandler(self.client, self.sheets)
-         #self.interactor.trailing_stop = i    
-         #self.interval.command = c[0]
-         #self.interval.interval = c[1]
 
-         #await self.create_groups()
          await self.client.send_message(buy_signals_group["channel_id"], 
                                     f'''
                                     Complete update \n

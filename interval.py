@@ -26,7 +26,6 @@ class IntervalHandler:
         if(self.task is not None):
             self.task.cancel()
         self.task = asyncio.create_task(self.auto_send())
-        print(asyncio.all_tasks())
 
 
     async def auto_send(self):

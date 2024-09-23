@@ -23,6 +23,7 @@ class Sheets:
     reports_range = "reports!A:C"
     interactor_range = "interactor!A:A"
     scraper_range = "scraper!A:B"
+    simple_range = "simple!A:B"
     creds = None
     # def __init__(self): 
     #     asyncio.run( self.auth())
@@ -61,6 +62,17 @@ class Sheets:
         
         return mapped_reports
 
+    def read_simple_feeds(self):
+        print("read simple feeds")
+        source_to_destination_map = []
+        simple_data = self.get_sheet_data(self.simple_range, self.creds)
+
+        data = simple_data[1:]
+        for item in data:
+            source = item[0]
+            destination = item[1]
+            source_to_destination_map.append({"source": int(source), "destination": int(destination)})
+        return source_to_destination_map
 
     def read_interactor_stop_loss(self):
         print("read interactor sheet")            
@@ -72,7 +84,6 @@ class Sheets:
     def read_scraper_data(self):
         print("read scraper sheet")
         sheet_data = self.get_sheet_data(self.scraper_range, self.creds)        
-        print(sheet_data)
         scraper_command = sheet_data[1:][0][0]
         scraper_interval = int(sheet_data[1:][0][1])
         print(f'scraper_command {scraper_command}')        
