@@ -9,6 +9,7 @@ import time
 import re
 from telethon.tl.types import Message
 from interactor import MaestroInteractor
+from  interval import IntervalHandler
 from sheets import Sheets
 import threading
 
@@ -39,6 +40,9 @@ class TelegramManager:
       self.client = client
       self.sheets = Sheets()      
       self.handlers = []
+      self.interactor = None
+      self.interval = None
+
    def get_group_users_to_add(self, group_name: str, groups):
       return list(filter(lambda x: x["name"]==group_name ,groups))[0]["users"]
 
@@ -192,6 +196,7 @@ class TelegramManager:
       # forward from buy signals group to trade bot
       @self.client.on(event=events.NewMessage(chats=[buy_signals_group['channel_id']]))
       async def handler(event):         
+         print(event.message.message)
          if(event.message.message.lower().startswith("update")):
             print("updating feeds")
             await self.check_for_new_feeds()
@@ -205,17 +210,16 @@ class TelegramManager:
       for h in self.handlers:
          print(f"removing listener {h}")
          self.client.remove_event_handler(h)
-
-      for h in self.interactor.handlers:
-         print(f"removing interactor listener {h}")
-         self.interactor.client.remove_event_handler(h)
-
-      await self.client.send_message(buy_signals_group["channel_id"], f'Started api service {datetime.datetime.now()}')
+      print(f"C:: {len(self.client.list_event_handlers())}")
+      self.handlers = []
+      
+      await self.client.send_message(buy_signals_group["channel_id"], f'Started api service1 {datetime.datetime.now()}')
       await self.source_to_feed_listener()
       await self.feed_to_report_listener()
       await self.buy_signals_to_trade_bot_listener()
       print("Listening...")
       print(f'Handlers registered: {len(self.handlers)}')
+      print(f'Interactor Handlers registered: {len(self.interactor.handlers)}')
 
    def getCodeFromFile(self): 
       code = ''
@@ -234,8 +238,16 @@ class TelegramManager:
          print("client started")
       except Exception as error:
          print(f'error starting client {error}')
-      async with self.client:         
+      async with self.client:
+         print("using new client")
+         if(self.interactor is not None):
+            self.interactor.__del__()
          self.interactor =  MaestroInteractor(self.client, self.sheets)
+         
+         if(self.interval is not None):
+            self.interval.__del__()
+         self.interval = IntervalHandler( self.client, self.sheets)
+         
          await self.create_buy_signals_group()
          if(send_update):
             await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
@@ -249,17 +261,28 @@ class TelegramManager:
       try:
          r = self.sheets.read_reports()
          f = self.sheets.read_feeds()
-         i = self.sheets.read_interactor_stop_loss()         
-         print(f'report_groups {self.report_groups}')
-         print(f'feeds {self.feeds}')
+
          self.feeds = f
-         self.report_groups = r         
-         self.interactor.trailing_stop = i         
+         self.report_groups = r
+         # self.interactor = MaestroInteractor(self.client, self.sheets)
+         # self.interval = IntervalHandler( self.client, self.sheets)
+        
+         # self.interactor = MaestroInteractor(self.client, self.sheets)
+         # self.interval = IntervalHandler(self.client, self.sheets)
+         #self.interactor.trailing_stop = i    
+         #self.interval.command = c[0]
+         #self.interval.interval = c[1]
+
          #await self.create_groups()
-         await self.client.send_message(buy_signals_group["channel_id"], f'''Complete update \n
-                                         Feeds: {self.feeds}\n 
-                                         Reports: {self.report_groups}\n
-                                         Stop Loss: {self.interactor.trailing_stop}''')         
+         await self.client.send_message(buy_signals_group["channel_id"], 
+                                    f'''
+                                    Complete update \n
+                                    Feeds: {self.feeds}\n 
+                                    Reports: {self.report_groups}\n
+                                    Stop Loss: {self.interactor.trailing_stop} \n
+                                    Scraper: {self.interval.command} :  {self.interval.interval}
+                                    '''
+                                 )         
       except Exception as error:
          print(f'Failed to read sheets {error}')
          await self.sheets.auth()

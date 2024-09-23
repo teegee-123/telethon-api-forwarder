@@ -15,19 +15,18 @@ load_dotenv()
 class MaestroInteractor:   
    
    def __init__(self, client: TelegramClient, sheets: Sheets):
+      print("init interactor")
       self.client = client
       self.sheets = sheets
       self.maestro_username = os.environ.get("TRADEBOTNAME")
       self.maestro_id = int(os.environ.get("MAESTRO_ID"))
-      self.trailing_stop = self.sheets.read_interactor_stop_loss()
       self.sleep_period = int(os.environ.get("SLEEP_TIME"))
       
+      self.trailing_stop = self.sheets.read_interactor_stop_loss()
       self.current_monitor: UpdateEditMessage = None
       self.buttons: list[{"name", "data"}] = [] 
       self.current_trades:list[{"name", "stop_loss", "percent"}] = []
       self.handlers = []
-      #monitor_updated_filter=lambda x: type(x) is UpdateEditMessage and x.message.message.startswith("📌 Primary Trade") #and x.message.peer_id.user_id == self.maestro_id
-      # monitor_messaged_filter=lambda x: type(x.original_update) is UpdateNewMessage and x.original_update.message.message.startswith("📌 Primary Trade") and x.original_update.message.peer_id.user_id == self.maestro_id
 
 
       @client.on(events.NewMessage(chats=[self.maestro_id], incoming=True))
@@ -148,3 +147,10 @@ class MaestroInteractor:
          return list(map(lambda x: x['text'] , buttons)).index(text)
       except:
          return None
+
+   def __del__(self):
+      print("delete interactor")
+      for h in self.handlers:
+         print(f"removing interactor listener {h}")
+         self.client.remove_event_handler(h)
+      self.handlers = []

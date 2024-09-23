@@ -22,6 +22,7 @@ class Sheets:
     feeds_range = "feeds!A:C"
     reports_range = "reports!A:C"
     interactor_range = "interactor!A:A"
+    scraper_range = "scraper!A:B"
     creds = None
     # def __init__(self): 
     #     asyncio.run( self.auth())
@@ -62,13 +63,22 @@ class Sheets:
 
 
     def read_interactor_stop_loss(self):
-        report_data = self.get_sheet_data(self.interactor_range, self.creds)
-        
-        stoplossData = report_data[1:][0][0]
         print("read interactor sheet")            
+        report_data = self.get_sheet_data(self.interactor_range, self.creds)        
+        stoplossData = report_data[1:][0][0]
         print(f"new stop loss {stoplossData}")
         return int(stoplossData)
-        
+
+    def read_scraper_data(self):
+        print("read scraper sheet")
+        sheet_data = self.get_sheet_data(self.scraper_range, self.creds)        
+        print(sheet_data)
+        scraper_command = sheet_data[1:][0][0]
+        scraper_interval = int(sheet_data[1:][0][1])
+        print(f'scraper_command {scraper_command}')        
+        print(f"scraper_interval {scraper_interval}")
+        return [scraper_command, scraper_interval]
+
 
     def get_sheet_data(self, range, creds):
         service = build("sheets", "v4", credentials=creds)

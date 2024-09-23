@@ -18,7 +18,9 @@ manager = TelegramManager(client)
 
 from starlette.background import BackgroundTasks
 
-
+# @app.on_event("startup")
+# async def on_startup():
+#     asyncio.run(manager.run())
 
 @app.get("/code")
 def set_code_with_slash(code: str):
@@ -31,7 +33,7 @@ def set_code_with_slash(code: str):
      return code
 
 
-@app.get("/run")
+@app.get("/")
 def run():
      asyncio.run(manager.run())     
      return "Started"
@@ -46,3 +48,7 @@ async def run():
      await client.disconnect()
      return "Stopped"
 
+@app.get("/send")
+async def send(): {
+     await manager.interactor.send_command(manager.client, 'hi')
+}
