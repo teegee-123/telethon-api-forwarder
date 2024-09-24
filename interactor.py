@@ -30,7 +30,7 @@ class MaestroInteractor:
 
 
       @client.on(events.NewMessage(chats=[self.maestro_id], incoming=True))
-      async def onMaestroMonitorShown(message: Message):         
+      async def onMaestroMonitorShown(message: Message):                  
          if(message.message.message.startswith("You are setting the sell low limit.")):
             primary_trade_name = self.current_monitor.message.message.split("🪙")[1].split("\n")[0].split(" ")[1]
             new_stop_loss = [x["stop_loss"] for x in self.current_trades if x["name"] == primary_trade_name][0]            
@@ -44,6 +44,7 @@ class MaestroInteractor:
             self.current_trades = []
          elif(message.message.message.startswith("✅ Sell transaction ")):
             await self.send_command('wallets')
+         print(f"on monitor shown {message.message.message}")
       self.handlers.append(onMaestroMonitorShown)
             
             
