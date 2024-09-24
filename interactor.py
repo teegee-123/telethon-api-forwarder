@@ -44,7 +44,7 @@ class MaestroInteractor:
             self.current_trades = []
          elif(message.message.message.startswith("🔄 Sell transaction of ")):
             await self.send_command('wallets')
-         print(f"on monitor shown {message.message.message}")
+         
       self.handlers.append(onMaestroMonitorShown)
             
             
