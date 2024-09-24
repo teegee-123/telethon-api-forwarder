@@ -76,9 +76,10 @@ class MaestroInteractor:
             message_text = event.message.message
             if(len(message_text.split("🚀")) > 1):
                primary_trade_percent = int(float(message_text.split("🚀")[1].split("\n")[0].split("%")[0]))
+               primary_trade_name = message_text.split("🪙")[1].split("\n")[0].split(" ")[1]
             else:
-               primary_trade_percent = -100
-            primary_trade_name = message_text.split("🪙")[1].split("\n")[0].split(" ")[1]
+               return
+            
             primary_trade_stop_loss = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))
             if(primary_trade_name in [x["name"] for x in self.current_trades]):
                print(f'Updating {primary_trade_name} values')
