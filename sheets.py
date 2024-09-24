@@ -42,7 +42,7 @@ class Sheets:
                 print(f'cannot parse feed {feed}')                
             mapped_feed = { "id": int(feed[0]), "name": feed[1], "users": json.loads(feed[2]) }
             mapped_feeds.append(mapped_feed)
-        
+        print(str(mapped_feeds))
         return mapped_feeds
 
     def read_reports(self):
@@ -59,7 +59,7 @@ class Sheets:
             mapped_report_feeds = list(map(lambda r: {"name": r},report_feeds))
             mapped_report = { "name": report[0], "users": json.loads(report[1]), "feeds": mapped_report_feeds }
             mapped_reports.append(mapped_report)
-        
+        print(str(mapped_reports))
         return mapped_reports
 
     def read_simple_feeds(self):

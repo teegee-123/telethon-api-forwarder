@@ -245,12 +245,13 @@ class TelegramManager:
       return code
 
    async def run(self, send_update = False):
-      await self.sheets.auth()
-      self.report_groups = self.sheets.read_reports()
-      self.feeds = self.sheets.read_feeds()
       try:
+         print("enter code: ")
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
+         await self.sheets.auth()
+         self.report_groups = self.sheets.read_reports()
+         self.feeds = self.sheets.read_feeds()
       except Exception as error:
          print(f'error starting client {error}')
       async with self.client:

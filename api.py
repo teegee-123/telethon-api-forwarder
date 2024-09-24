@@ -15,8 +15,7 @@ api_hash = os.environ.get("API_HASH")
 app = FastAPI()
 client = TelegramClient(session, api_id, api_hash)
 manager = TelegramManager(client)
-
-from starlette.background import BackgroundTasks
+#from starlette.background import BackgroundTasks
 
 # @app.on_event("startup")
 # async def on_startup():
@@ -34,7 +33,7 @@ def set_code_with_slash(code: str):
 
 
 @app.get("/")
-def run():
+def run():     
      asyncio.run(manager.run())     
      return "Started"
 
@@ -46,7 +45,9 @@ def run():
 @app.get("/stop")
 async def run():     
      await client.disconnect()
-     return "Stopped"
+     asyncio.get_running_loop().stop()
+     return asyncio.all_tasks(asyncio.get_running_loop()).__str__()
+     #return "Stopped"
 
 @app.get("/send")
 async def send(): {
