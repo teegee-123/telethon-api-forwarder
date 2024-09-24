@@ -49,7 +49,7 @@ class MaestroInteractor:
             print("clearing trades")
             self.current_trades = []
             print(f"on monitor shown {message.message.message}")
-            
+
       self.handlers.append(onMaestroMonitorShown)
             
             
@@ -74,7 +74,10 @@ class MaestroInteractor:
          #if its normal menu set current trades values
          if('%' not in [x['text'] for x in self.buttons]):
             message_text = event.message.message
-            primary_trade_percent = int(float(message_text.split("🚀")[1].split("\n")[0].split("%")[0]))
+            if(len(message_text.split("🚀")) > 1):
+               primary_trade_percent = int(float(message_text.split("🚀")[1].split("\n")[0].split("%")[0]))
+            else:
+               primary_trade_percent = -100
             primary_trade_name = message_text.split("🪙")[1].split("\n")[0].split(" ")[1]
             primary_trade_stop_loss = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))
             if(primary_trade_name in [x["name"] for x in self.current_trades]):
@@ -132,6 +135,8 @@ class MaestroInteractor:
       await message.click(data=code)
 
    def get_buttons_from_menu(self, update: UpdateEditMessage):
+      if(update.message.reply_markup is None):
+         return []
       buttons = list(itertools.chain.from_iterable(map(lambda b: b.buttons, update.message.reply_markup.rows)))
       return list(map(lambda b: {'text':b.text, 'data': b.data}, buttons))
 
