@@ -44,6 +44,7 @@ class MaestroInteractor:
             print(f"on monitor shown {message.message.message}")
             self.current_trades = []
          elif("Sell transaction of" in message.message.message):
+            self.current_trades = []
             await self.send_command('wallets')
          elif(message.message.message.startswith("Public Commands:")):
             print("clearing trades")
