@@ -49,7 +49,8 @@ class MaestroInteractor:
             print("clearing trades")
             self.current_trades = []
             print(f"on monitor shown {message.message.message}")
-
+         if(message.message.message is not None):
+            print(message.message.message.split("\n")[0])
       self.handlers.append(onMaestroMonitorShown)
             
             
