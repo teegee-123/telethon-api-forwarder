@@ -41,10 +41,15 @@ class MaestroInteractor:
             await message.message.click(text="➡")
          elif(message.message.message.startswith("❌ You do not have any active monitors!")):
             print("clearing trades")
+            print(f"on monitor shown {message.message.message}")
             self.current_trades = []
          elif(message.message.message.startswith("🔄 Sell transaction of ")):
             await self.send_command('wallets')
-         
+         elif(message.message.message.startswith("Public Commands:")):
+            print("clearing trades")
+            self.current_trades = []
+            print(f"on monitor shown {message.message.message}")
+            
       self.handlers.append(onMaestroMonitorShown)
             
             
