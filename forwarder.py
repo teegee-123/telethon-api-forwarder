@@ -214,6 +214,7 @@ class TelegramManager:
          if(event.message.message.lower().startswith("update")):
             print("updating feeds")
             await self.check_for_new_feeds()
+            await self.interactor.send_command(self.client, 'monitor')
          else:
             print("Forward to trade bot")
             await self.client.send_message(trade_bot, event.message)      
@@ -253,6 +254,7 @@ class TelegramManager:
          self.report_groups = self.sheets.read_reports()
          self.feeds = self.sheets.read_feeds()
       except Exception as error:
+         await self.sheets.auth()
          print(f'error starting client {error}')
       async with self.client:
          print("using new client")

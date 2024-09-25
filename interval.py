@@ -31,10 +31,12 @@ class IntervalHandler:
     async def auto_send(self):
         while self.running:
             await self.client.send_message('Pfscrapedevbot', f'/{self.command}')
+            await self.client.send_message('MaestroSniperBot', f'/monitor')
             await asyncio.sleep(self.interval)
     
     def __del__(self):
         print("delete interval")
-        self.task.cancel()
+        if(self.task is not None):
+            self.task.cancel()
         self.running = False
     
