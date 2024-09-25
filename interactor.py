@@ -71,7 +71,7 @@ class MaestroInteractor:
                primary_trade["age"] = self.convert_time_to_seconds(message_text.split("Time elapsed:")[1].split("\n")[0])
             except:
                print("ERROR setting SL")
-            primary_is_oldest = self.is_oldest(primary_trade["age"])
+            primary_is_oldest = self.is_oldest(primary_trade["age"]) and len([x for x in self.current_trades if x["age"] != 0] > 0)
          else:
             print(f"Could not find primary trade {self.current_trades}")            
             return 
@@ -107,7 +107,7 @@ class MaestroInteractor:
                   trade_with_wrong_stop_loss = [x for x in  self.current_trades if x["stop_loss"] != self.trailing_stop and x["stop_loss"] < x["percent"] + self.trailing_stop and x["index"]!=0]
                   print(f"SL TO UPDATE {trade_with_wrong_stop_loss}")                     
                   # check for incomplete trade data
-                  if(len(trade_with_missing_data) > 1 and trade_with_missing_data[1]["index"] != 0):
+                  if(len(trade_with_missing_data) > 0 and trade_with_missing_data[1]["index"] != 0):
                      await self.navigate_to_trade_at_index(random.choice(trade_with_missing_data)["index"])
                   # check for stop losses that need changing
                   elif(len(trade_with_wrong_stop_loss) > 0):
