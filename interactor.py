@@ -60,6 +60,7 @@ class MaestroInteractor:
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
       async def handler(event: UpdateEditMessage):
          self.buttons = self.get_buttons_from_menu(event)
+         message_text = event.message.message
          # if monitor was edited 
          if(len(self.buttons) > 0):
             #if it has '%' button click it, we want to set SL
@@ -77,7 +78,6 @@ class MaestroInteractor:
             
             #if its normal menu set current trades values
             elif('%' not in [x['text'] for x in self.buttons]):
-               message_text = event.message.message
                if(len(message_text.split("🚀")) > 1):
                   primary_trade_percent = int(float(message_text.split("🚀")[1].split("\n")[0].split("%")[0]))
                   primary_trade_name = message_text.split("🪙")[1].split("\n")[0].split(" ")[1]

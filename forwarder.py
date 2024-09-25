@@ -292,7 +292,7 @@ class TelegramManager:
                                  )         
       except Exception as error:
          print(f'Failed to read sheets {error}')
-         await self.sheets.auth()
+         # await self.sheets.auth()
 
       await self.run(send_update=False)
 
