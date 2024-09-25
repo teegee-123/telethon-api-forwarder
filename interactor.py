@@ -71,7 +71,7 @@ class MaestroInteractor:
                primary_trade["age"] = self.convert_time_to_seconds(message_text.split("Time elapsed:")[1].split("\n")[0])
             except:
                print("ERROR setting SL")
-            primary_is_oldest = self.is_oldest(primary_trade["age"]) and len([x for x in self.current_trades if x["age"] != 0] > 0)
+            primary_is_oldest = self.is_oldest(primary_trade["age"]) and len([x for x in self.current_trades if x["age"] != 0]) > 0
          else:
             print(f"Could not find primary trade {self.current_trades}")            
             return 
