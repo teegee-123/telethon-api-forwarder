@@ -45,7 +45,7 @@ class MaestroInteractor:
             self.current_trades = []
          elif("Sell transaction of" in message.message.message):
             self.current_trades = []
-            await self.send_command('wallets')
+            await self.send_command(client, 'wallets')
          elif(message.message.message.startswith("Public Commands:")):
             print("clearing trades")
             self.current_trades = []
@@ -134,7 +134,7 @@ class MaestroInteractor:
                      await event.message.click(text=nav_right_button["text"])
                      time.sleep(self.sleep_period)
          elif("Sell transaction of" in message_text):
-            await self.send_command('wallets')
+            await self.send_command(self.client, 'wallets')
       self.handlers.append(handler)
            
 
@@ -156,7 +156,7 @@ class MaestroInteractor:
                total_seconds += int(p.replace("s", ""))
       return total_seconds
 
-   async def send_command(self, client, command):
+   async def send_command(self, client: TelegramClient, command: str):
       await client.send_message(self.maestro_username, f'/{command}')
 
    async def click_button_by_text(self, message, button_text):
