@@ -251,6 +251,7 @@ class TelegramManager:
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
          await self.sheets.auth()
+         print("sheets authed")
          self.report_groups = self.sheets.read_reports()
          self.feeds = self.sheets.read_feeds()
       except Exception as error:
