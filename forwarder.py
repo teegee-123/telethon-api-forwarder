@@ -247,7 +247,7 @@ class TelegramManager:
 
    async def run(self, send_update = False):
       try:
-         print("enter code: ")
+         print("enter code1: ")
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
          await self.sheets.auth()

@@ -32,7 +32,7 @@ def set_code_with_slash(code: str):
      return code
 
 
-@app.get("/run")
+@app.get("/")
 def run():     
      asyncio.run(manager.run())     
      return "Started"
