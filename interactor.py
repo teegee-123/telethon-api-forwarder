@@ -55,59 +55,73 @@ class MaestroInteractor:
       @client.on(events.MessageEdited(chats=[self.maestro_id]))
       async def handler(event: UpdateEditMessage):
          print(f"EDITED: " + event.message.message.replace('\n', ""))
+         self.current_monitor = event
          self.buttons = self.get_buttons_from_menu(event)
+         
          message_text = event.message.message
-         # if monitor was edited 
-         if(len(self.buttons) > 0):
-            self.current_monitor = event                        
-            
-            #if it has '%' button click it, we want to set SL
-            if('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):               
-               percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
-               if(len(percent_button_text)):                  
-                  await self.click_button_by_text(event.message, percent_button_text[0])
-               ##else:                   
-            
-            #if its normal menu set current trades values
-            elif('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
+         self.update_current_trades(message_text)
+         primary_trade = [x for x in self.current_trades if x["index"]==0]         
+         primary_is_oldest = False
 
-               self.update_current_trades(message_text)
-               primary_trade = self.current_trades[0]
-               primary_trade["stop_loss"] = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))               
+         if(len([x for x in self.current_trades if x["index"]==0]) > 0):
+            primary_trade = [x for x in self.current_trades if x["index"]==0][0]
+            try:
+               if('%' not in [x['text'] for x in self.buttons]):
+                  primary_trade["stop_loss"] = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))
                primary_trade["age"] = self.convert_time_to_seconds(message_text.split("Time elapsed:")[1].split("\n")[0])
-               print(f"All: {self.current_trades}")
-               print(f"Primary: {primary_trade}")
+            except:
+               print("ERROR setting SL")
+            primary_is_oldest = self.is_oldest(primary_trade["age"])
+         else:
+            print(f"Could not find primary trade {self.current_trades}")            
+            return 
+         print(f"PRIMARY TRADE: {primary_trade}")
+         print(f"% button: {'%' in [x['text'] for x in self.buttons]}")
+         #if it has '%' button click it, we want to set SL
+         if('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):               
+            percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
+            if(len(percent_button_text)):                  
+               await self.click_button_by_text(event.message, percent_button_text[0])
+            ##else:                   
+         
+         #if its normal menu set current trades values
+         elif('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):            
 
-               # setting new stop loss
-               if(primary_trade["stop_loss"] < primary_trade["percent"] + self.trailing_stop ):                                    
-                  primary_trade["stop_loss"] = primary_trade["percent"] + self.trailing_stop                  
-                  await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
-               
-               # iterate trades
-               else:                  
-                  if(self.is_oldest(primary_trade["age"]) and len(self.current_trades)>=7):
-                     # close oldest trade                     
-                     sell_all_button = self.get_sell_all_button(self.buttons)
-                     await event.message.click(text=sell_all_button["text"])
-                  # navigate to trade missing stop_loss or age
-                  else:
-                     self.update_current_trades(event.message.message)
-                     # trades with missing stop_loss or age
-                     trade_with_missing_data = [x for x in  self.current_trades if (x["age"] == 0) and x["index"] != 0]                     
-                     # trades with stop_loss that need updating
-                     trade_with_wrong_stop_loss = [x for x in  self.current_trades if x["stop_loss"] != self.trailing_stop and x["stop_loss"] < x["percent"] + self.trailing_stop and x["index"]!=0]
-                     print(f"SL TO UPDATE {trade_with_wrong_stop_loss}")                     
-                     if(len(trade_with_wrong_stop_loss) > 0):
-                        await client.send_message('me', str(trade_with_wrong_stop_loss))
-                     # check for incomplete trade data
-                     if(len(trade_with_missing_data) > 1 and trade_with_missing_data[1]["index"] != 0):
-                        await self.navigate_to_trade_at_index(random.choice(trade_with_missing_data)["index"])
-                     # check for stop losses that need changing
-                     elif(len(trade_with_wrong_stop_loss) > 0 and trade_with_wrong_stop_loss[1]["index"] != 0):
+            # setting new stop loss
+            if(primary_trade["stop_loss"] < primary_trade["percent"] + self.trailing_stop ):                                    
+               primary_trade["stop_loss"] = primary_trade["percent"] + self.trailing_stop                  
+               await self.current_monitor.message.click(text=self.get_stop_loss_button(self.buttons)["text"])               
+            
+            # iterate trades
+            else:
+               if(primary_is_oldest and len(self.current_trades)>=6):
+                  # close oldest trade                     
+                  sell_all_button = self.get_sell_all_button(self.buttons)
+                  await event.message.click(text=sell_all_button["text"])
+                  time.sleep(self.sleep_period)
+               # navigate to trade missing stop_loss or age
+               else:
+                  # trades with missing stop_loss or age
+                  trade_with_missing_data = [x for x in  self.current_trades if (x["age"] == 0) and x["index"] != 0]                     
+                  # trades with stop_loss that need updating
+                  trade_with_wrong_stop_loss = [x for x in  self.current_trades if x["stop_loss"] != self.trailing_stop and x["stop_loss"] < x["percent"] + self.trailing_stop and x["index"]!=0]
+                  print(f"SL TO UPDATE {trade_with_wrong_stop_loss}")                     
+                  # check for incomplete trade data
+                  if(len(trade_with_missing_data) > 1 and trade_with_missing_data[1]["index"] != 0):
+                     await self.navigate_to_trade_at_index(random.choice(trade_with_missing_data)["index"])
+                  # check for stop losses that need changing
+                  elif(len(trade_with_wrong_stop_loss) > 0):
+                     index = random.choice(trade_with_wrong_stop_loss)["index"]
+                     if (index!=0):
                         await self.navigate_to_trade_at_index(random.choice(trade_with_wrong_stop_loss)["index"])
-                     time.sleep(self.sleep_period)
-                     # TODO add this back with bigger sleep time
-                     #await self.send_command(self.client, 'monitor')
+                     else:
+                        await self.navigate_to_trade_at_index(1) 
+                  #nav to random
+                  else:                                            
+                     await self.navigate_to_trade_at_index(random.choice([x for x in self.current_trades if x["index"]!=0])["index"])
+                  time.sleep(self.sleep_period)
+                  # TODO add this back with bigger sleep time
+                  #await self.send_command(self.client, 'monitor')
       self.handlers.append(handler)
       
       loop = asyncio.get_event_loop()
@@ -121,15 +135,15 @@ class MaestroInteractor:
       percent = int(float(trade.split("🚀")[1].split("%")[0].strip()))
       trade_item = [x for x in self.current_trades if x["name"] == name]      
       primary_trade_age = self.convert_time_to_seconds(original_message.split("Time elapsed:")[1].split("\n")[0])
-      primary_trade_stop_loss = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))
+      #primary_trade_stop_loss = int(str(self.get_stop_loss_button(self.buttons)['text']).replace("%", ''))
       # primary trade
       if(len(trade_item) > 0 and index == 0):          
-         return {"index": 0, "name": name, "percent": percent, "age": primary_trade_age, "stop_loss": primary_trade_stop_loss}
+         return {"index": 0, "name": name, "percent": percent, "age": primary_trade_age, "stop_loss": percent - abs(self.trailing_stop)}
       # other trade
       elif(len(trade_item) > 0):         
-         return {"index": index, "name": name, "percent": percent, "age": trade_item[0]["age"], "stop_loss": trade_item[0]["stop_loss"]}
+         return {"index": index, "name": name, "percent": percent, "age": trade_item[0]["age"], "stop_loss": percent - abs(self.trailing_stop)}
       else:         
-         return {"index": index, "name": name, "percent": percent, "age": primary_trade_age if index == 0 else 0, "stop_loss": primary_trade_stop_loss if index == 0 else self.trailing_stop}
+         return {"index": index, "name": name, "percent": percent, "age": primary_trade_age if index == 0 else 0, "stop_loss": percent - abs(self.trailing_stop)}
 
       # # new trade
       # else:      
@@ -178,7 +192,7 @@ class MaestroInteractor:
 
 
    def get_stop_loss_button(self, buttons):
-      return buttons[self.try_get_button_index_by_text(buttons, '◀ Lo | Hi ▶') - 1]
+         return buttons[self.try_get_button_index_by_text(buttons, '◀ Lo | Hi ▶') - 1]
 
    def get_refresh_button(self, buttons):
       return buttons[self.try_get_button_index_by_text(buttons, '➡') - 1]
@@ -190,7 +204,7 @@ class MaestroInteractor:
       return buttons[self.try_get_button_index_by_text(buttons, '➡')]
 
    def get_sell_all_button(self, buttons):
-      return buttons[self.try_get_button_index_by_text(buttons, '75%') + 1]
+      return buttons[self.try_get_button_index_by_text(buttons, '100%')]
 
    def try_get_button_index_by_text(self, buttons, text):
       try:
