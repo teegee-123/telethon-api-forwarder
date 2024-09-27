@@ -270,6 +270,7 @@ class TelegramManager:
          self.interval = IntervalHandler( self.client, self.sheets)
          
          await self.create_buy_signals_group()
+         self.interactor.buy_signals_group_id = buy_signals_group["channel_id"]
          if(send_update):
             await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
          await self.create_groups()

@@ -27,6 +27,7 @@ class MaestroInteractor:
       self.current_trades:list[{"name", "read_stop_loss", "percent", "age", "desired_stop_loss"}] = []
       self.primary_trade = None
       self.handlers = []
+      self.buy_signals_group_id = None
 
 
       @client.on(events.NewMessage(chats=[self.maestro_id], incoming=True))
@@ -78,8 +79,10 @@ class MaestroInteractor:
                if(oldest_trade["name"] != self.primary_trade["name"]):
                   await self.navigate_to_trade_at_index(oldest_trade["index"])
                # oldest is primary, sell it
-               else:                  
+               else:
                   # click sell button
+                  if(self.buy_signals_group_id is not None):
+                     await self.client.send_message(self.buy_signals_group_id, f"*Pruging*\n{self.current_trades}\n\n*PRIMARY:* {self.primary_trade}\n\n*OLDEST:* {oldest_trade}")
                   await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
