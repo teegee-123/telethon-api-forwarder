@@ -84,6 +84,7 @@ class MaestroInteractor:
                   if(self.buy_signals_group_id is not None):
                      await self.client.send_message(self.buy_signals_group_id, f"*Pruging*\n{self.current_trades}\n\n*PRIMARY:* {self.primary_trade}\n\n*OLDEST:* {oldest_trade}")
                   await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+                  time.sleep(self.sleep_period)
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
             if(len(percent_button_text)):                  
