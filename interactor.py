@@ -41,6 +41,7 @@ class MaestroInteractor:
          elif(message.message.message.startswith("❌ You do not have any active monitors!")):                        
             self.current_trades = []
          elif("Sell transaction of" in message.message.message):
+            time.sleep(self.sleep_period)
             await self.send_command(client, 'wallets')
          elif(message.message.message.startswith("Public Commands:")):            
             self.current_trades = []            
