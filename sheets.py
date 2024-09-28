@@ -23,7 +23,7 @@ class Sheets:
     reports_range = "reports!A:C"
     interactor_range = "interactor!A:A"
     scraper_range = "scraper!A:B"
-    simple_range = "simple!A:B"
+    simple_range = "simple!A:C"
     creds = None
     # def __init__(self): 
     #     asyncio.run( self.auth())
@@ -71,7 +71,9 @@ class Sheets:
         for item in data:
             source = item[0]
             destination = item[1]
-            source_to_destination_map.append({"source": int(source), "destination": int(destination)})
+            filter = str(item[2]) or None
+            print(f"filter {filter}")
+            source_to_destination_map.append({"source": int(source), "destination": int(destination), "filter": filter})
         return source_to_destination_map
 
     def read_interactor_stop_loss(self):
