@@ -12,6 +12,7 @@ from interactor import MaestroInteractor
 from  interval import IntervalHandler
 from sheets import Sheets
 import threading
+from telethon.tl.types import UpdateNewMessage
 
 
 load_dotenv()
@@ -149,14 +150,14 @@ class TelegramManager:
       sources = [i["source"] for i in source_map]
       print(sources)
       @self.client.on(events.NewMessage(chats=sources))
-      async def handler(event):
+      async def handler(event: UpdateNewMessage):
          source_id = self.getSenderIdFromMessage(event)
          destinations = [{"destination": i["destination"], "filter": i["filter"]} for i in source_map if i["source"]==source_id]
          print(destinations)
          for destination in destinations:
             filter = destination["filter"]
             dest = destination["destination"]
-            if(len(re.findall(filter, event.message)) > 0):
+            if(len(re.findall(filter, event.message.message)) > 0):
                print(f"sending simple forward")
                await self.client.send_message(dest, event.message)
             else:               
