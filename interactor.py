@@ -78,18 +78,18 @@ class MaestroInteractor:
             elif(len(trades_with_outdated_stop_loss) > 0):
                await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])               
             # purge oldest
-            elif(len(self.current_trades) >= 7):
-               oldest_trade = self.get_oldest_trade()
+            #elif(len(self.current_trades) >= 7):
+             #  oldest_trade = self.get_oldest_trade()
                # oldest is not primary
-               if(oldest_trade["name"] != self.primary_trade["name"]):
-                  await self.navigate_to_trade_at_index(oldest_trade["index"])
+              # if(oldest_trade["name"] != self.primary_trade["name"]):
+              #    await self.navigate_to_trade_at_index(oldest_trade["index"])
                # oldest is primary, sell it
-               else:
+              #else:
                   # click sell button
-                  if(self.buy_signals_group_id is not None):
-                     await self.client.send_message(self.buy_signals_group_id, f"*Pruging*\n{self.current_trades}\n\n*PRIMARY:* {self.primary_trade}\n\n*OLDEST:* {oldest_trade}")
-                  await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                  time.sleep(self.sleep_period)
+                  #if(self.buy_signals_group_id is not None):
+                  #   await self.client.send_message(self.buy_signals_group_id, f"*Pruging*\n{self.current_trades}\n\n*PRIMARY:* {self.primary_trade}\n\n*OLDEST:* {oldest_trade}")
+                 # await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+                 # time.sleep(self.sleep_period)
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
             if(len(percent_button_text)):                  
