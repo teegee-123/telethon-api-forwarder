@@ -43,7 +43,7 @@ class MaestroInteractor:
          elif("Sell transaction of" in message.message.message):
             time.sleep(self.sleep_period)
             await self.send_command(client, 'wallets')
-         elif(message.message.message.startswith("Public Commands:")):            
+         elif(message.message.message.startswith("Public Commands:")):
             self.current_trades = []            
          # if(message.message.message is not None):         
       self.handlers.append(onMaestroMonitorShown)
@@ -61,35 +61,31 @@ class MaestroInteractor:
 
          if('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             self.current_trades = self.get_trades_from_message(message_text)            
+            self.primary_trade = self.current_trades[0]
+            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0]
+            trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
+            trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
             
             # tell scraper bot how many open trades there are
             await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
             
-            self.primary_trade = self.current_trades[0]
-            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0]
-            trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
-            #check if primary trade stop loss needs to be updated
-            if(self.primary_trade["read_stop_loss"] < self.primary_trade["desired_stop_loss"]):
-               await event.message.click(text=self.get_stop_loss_button(self.buttons)["text"])
             # ensure all trades are filled out
-            elif(len(unfilled_trades)):
+            if(len(unfilled_trades) > 0):               
                await self.navigate_to_trade_at_index(unfilled_trades[0]["index"])
             #navigate to trades if they need to update stop loss            
             elif(len(trades_with_outdated_stop_loss) > 0):
-               await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])               
-            # purge oldest
-            #elif(len(self.current_trades) >= 7):
-             #  oldest_trade = self.get_oldest_trade()
-               # oldest is not primary
-              # if(oldest_trade["name"] != self.primary_trade["name"]):
-              #    await self.navigate_to_trade_at_index(oldest_trade["index"])
-               # oldest is primary, sell it
-              #else:
-                  # click sell button
-                  #if(self.buy_signals_group_id is not None):
-                  #   await self.client.send_message(self.buy_signals_group_id, f"*Pruging*\n{self.current_trades}\n\n*PRIMARY:* {self.primary_trade}\n\n*OLDEST:* {oldest_trade}")
-                 # await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                 # time.sleep(self.sleep_period)
+               #check if primary trade stop loss needs to be updated
+               if(self.primary_trade["read_stop_loss"] < self.primary_trade["desired_stop_loss"]):
+                  await event.message.click(text=self.get_stop_loss_button(self.buttons)["text"])
+               else:
+                  await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])
+            # purge older than an hour
+            elif(len(trades_older_than_an_hour) > 0):
+               if(self.primary_trade["age"] >= 60 * 60):
+                  await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+                  time.sleep(self.sleep_period * 2)
+               else:
+                  await self.navigate_to_trade_at_index(trades_older_than_an_hour[0]["index"])
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
             if(len(percent_button_text)):                  
