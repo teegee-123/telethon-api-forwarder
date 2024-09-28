@@ -154,11 +154,13 @@ class TelegramManager:
          destinations = [{"destination": i["destination"], "filter": i["filter"]} for i in source_map if i["source"]==source_id]
          print(destinations)
          for destination in destinations:
-            if(len(re.findall(destination["filter"], event.message)) > 0):
+            filter = destination["filter"]
+            dest = destination["destination"]
+            if(len(re.findall(filter, event.message)) > 0):
                print(f"sending simple forward")
-               await self.client.send_message(destination["destination"], event.message)
-            else:
-               print(f"not sending simple forward {destination["filter"]} doesnt match {event.message}")
+               await self.client.send_message(dest, event.message)
+            else:               
+               print(f"not sending simple forward {filter} doesnt match {event.message}")
 
       self.handlers.append(handler)
 
