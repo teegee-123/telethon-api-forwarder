@@ -61,6 +61,10 @@ class MaestroInteractor:
 
          if('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             self.current_trades = self.get_trades_from_message(message_text)            
+            
+            # tell scraper bot how many open trades there are
+            await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
+            
             self.primary_trade = self.current_trades[0]
             unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0]
             trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
