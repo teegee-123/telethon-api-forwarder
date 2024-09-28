@@ -71,7 +71,7 @@ class Sheets:
         for item in data:
             source = item[0]
             destination = item[1]
-            filter = str(item[2]) or None
+            filter = str(item[2]) or ''
             print(f"filter {filter}")
             source_to_destination_map.append({"source": int(source), "destination": int(destination), "filter": filter})
         return source_to_destination_map
