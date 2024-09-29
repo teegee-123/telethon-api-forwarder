@@ -24,7 +24,7 @@ class MaestroInteractor:
       self.trailing_stop = self.sheets.read_interactor_stop_loss()
       self.current_monitor: UpdateEditMessage = None
       self.buttons: list[{"name", "data"}] = [] 
-      self.current_trades:list[{"name", "read_stop_loss", "percent", "age", "desired_stop_loss"}] = []
+      self.current_trades:list[{"name", "read_stop_loss", "percent", "age", "desired_stop_loss", "last_read"}] = []
       self.primary_trade = None
       self.handlers = []
       self.buy_signals_group_id = None
@@ -62,10 +62,11 @@ class MaestroInteractor:
          if('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             self.current_trades = self.get_trades_from_message(message_text)            
             self.primary_trade = self.current_trades[0]
-            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0]
+            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0 or x["last_read"] is None]
             trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
             trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
-            
+            # trades read more than 150 seconds ago
+            most_stale_trades = [x for x in self.current_trades if time.time() - x["last_read"] >= 150]
             # tell scraper bot how many open trades there are
             await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
             
@@ -82,10 +83,13 @@ class MaestroInteractor:
             # purge older than an hour
             elif(len(trades_older_than_an_hour) > 0):
                if(self.primary_trade["age"] >= 60 * 60):
-                  await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                  time.sleep(self.sleep_period * 2)
+                  loop = asyncio.get_event_loop()
+                  asyncio.run_coroutine_threadsafe(self.sell_all_and_wait(event) , loop)
                else:
                   await self.navigate_to_trade_at_index(trades_older_than_an_hour[0]["index"])
+            elif(len(most_stale_trades) > 0 ):
+               await self.navigate_to_trade_at_index(most_stale_trades[0]["index"])
+
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               
             if(len(percent_button_text)):                  
@@ -97,6 +101,10 @@ class MaestroInteractor:
       loop = asyncio.get_event_loop()
       asyncio.run_coroutine_threadsafe(self.send_command(self.client, 'monitor'), loop)      
       
+
+   async def sell_all_and_wait(self, event):
+      await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+      time.sleep(self.sleep_period * 3)
 
 
    def get_oldest_trade(self):
@@ -111,18 +119,19 @@ class MaestroInteractor:
       index = int(trade.split("🪙")[0].replace("/", "").strip() or '0')
       name = trade.split("🪙")[1].split("🚀")[0].replace("$", "").strip()      
       percent = float(trade.split("🚀")[1].split("%")[0].strip())
-      trade_item = [x for x in self.current_trades if x["name"] == name]            
+      trade_item = [x for x in self.current_trades if x["name"] == name]
+      now = time.time()
       # primary trade
       if(index == 0):
-         current_stop_loss = float(self.get_stop_loss_button(self.buttons)["text"].replace("%", ""))
+         current_stop_loss = round(float(self.get_stop_loss_button(self.buttons)["text"].replace("%", "")), 2)
          current_age = self.convert_time_to_seconds(original_message.split("Time elapsed:")[1].split("\n")[0])
-         return {"index": index, "name": name, "percent": percent, "age": current_age, "read_stop_loss": current_stop_loss, "desired_stop_loss": max(percent + self.trailing_stop, current_stop_loss, self.trailing_stop) }
+         return {"index": index, "name": name, "percent": percent, "age": current_age, "read_stop_loss": current_stop_loss, "desired_stop_loss": round(max(percent + self.trailing_stop, current_stop_loss, self.trailing_stop), 2) , "last_read": now }
       # other trade
       else:
          if(len(trade_item)):            
-            return {"index": index, "name": name, "percent": percent, "age": trade_item[0]["age"], "read_stop_loss": trade_item[0]["read_stop_loss"], "desired_stop_loss": max(percent + self.trailing_stop, trade_item[0]["read_stop_loss"], self.trailing_stop) }
+            return {"index": index, "name": name, "percent": percent, "age": trade_item[0]["age"], "read_stop_loss": trade_item[0]["read_stop_loss"], "desired_stop_loss": round(max(percent + self.trailing_stop, trade_item[0]["read_stop_loss"], self.trailing_stop) , 2), "last_read": trade[0]["last_read"] }
          else:
-            return {"index": index, "name": name, "percent": percent, "age": 0, "read_stop_loss": -100, "desired_stop_loss": max(percent + self.trailing_stop, self.trailing_stop) }
+            return {"index": index, "name": name, "percent": percent, "age": 0, "read_stop_loss": -100, "desired_stop_loss": round(max(percent + self.trailing_stop, self.trailing_stop), 2), "last_read": None }
 
    def get_trades_from_message(self, message: str):
       return [self.read_trade_string(x, message) for x in re.findall("🪙*.*", message) if "🚀" in x]
