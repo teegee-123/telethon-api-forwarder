@@ -10,8 +10,8 @@ import re
 from telethon.tl.types import Message
 from interactor import MaestroInteractor
 from  interval import IntervalHandler
+from reports import ReportHandler
 from sheets import Sheets
-import threading
 from telethon.tl.types import UpdateNewMessage
 
 
@@ -41,10 +41,10 @@ class TelegramManager:
    def __init__(self, client: TelegramClient):
       self.client = client
       self.sheets = Sheets()      
-      self.maestro_username = os.environ.get("TRADEBOTNAME")
       self.handlers = []
       self.interactor = None
       self.interval = None
+      self.report_generator = ReportHandler(self.client)
 
    def get_group_users_to_add(self, group_name: str, groups):
       return list(filter(lambda x: x["name"]==group_name ,groups))[0]["users"]
@@ -163,7 +163,7 @@ class TelegramManager:
                print(f"sending simple forward")
                await self.client.send_message(dest, event.message)
             else:               
-               print(f"not sending simple forward {filter} doesnt match {event.message}")
+               print(f"not sending simple forward {filter} doesnt match {event.message.message}")
 
       self.handlers.append(handler)
 
@@ -226,24 +226,13 @@ class TelegramManager:
             await self.interactor.send_command(self.client, 'monitor')
          elif(event.message.message.lower().startswith("trades")):
             await self.client.send_message(buy_signals_group['channel_id'], str(self.interactor.current_trades))
-         elif(event.message.message.lower().startswith("report")):            
-            report_time = int(event.message.message.split("report")[1].strip() or 8)
-            # at most 2 days worth
-            if(report_time > 48):
-               report_time = 8
-            now = datetime.datetime()
-            num_trades = 0
-            total_percent = 0
-            date_from = datetime.datetime(now.year, now.month, now.day, now.hour - report_time)
-            async for message in self.client.iter_messages(self.maestro_username, reverse=True, offset_date=date_from):
-               if(message.text.startswith("⚠️ Initiating auto")):
-                  percent_on_trade = round(float(message.text.split("has been met (")[1].split("%")[0]), 2)
-                  num_trades += 1
-                  total_percent += percent_on_trade
-                  
-            response_message = f'Total trades in the passed *{report_time} hours*: *{num_trades}*\n'
-            response_message  += f'P/L in this period: *{total_percent}*'
-            await self.client.send_message(buy_signals_group['channel_id'], response_message, parse_mode="markdown")
+         elif(event.message.message.lower().startswith("report")):    
+            response_message = await self.report_generator.get_trade_report(event)
+            await self.client.send_message(buy_signals_group['channel_id'], response_message, parse_mode="Markdown")
+         elif(event.message.message.lower().startswith("details")):
+            response_message = await self.report_generator.get_detailed_report(event)
+            await self.client.send_message(buy_signals_group['channel_id'], response_message, parse_mode="Markdown")
+
 
          else:
             print("Forward to trade bot")
