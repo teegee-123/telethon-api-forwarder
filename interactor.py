@@ -83,8 +83,11 @@ class MaestroInteractor:
             # purge older than an hour
             elif(len(trades_older_than_an_hour) > 0):
                if(self.primary_trade["age"] >= 60 * 60):
-                  loop = asyncio.get_event_loop()
-                  asyncio.run_coroutine_threadsafe(self.sell_all_and_wait(event) , loop)
+                  percent = self.primary_trade["percent"]
+                  age = self.primary_trade["age"]
+                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
+                  await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+                  time.sleep(self.sleep_period * 3)                  
                else:
                   await self.navigate_to_trade_at_index(trades_older_than_an_hour[0]["index"])
             elif(len(most_stale_trades) > 0 ):
@@ -101,10 +104,6 @@ class MaestroInteractor:
       loop = asyncio.get_event_loop()
       asyncio.run_coroutine_threadsafe(self.send_command(self.client, 'monitor'), loop)      
       
-
-   async def sell_all_and_wait(self, event):
-      await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-      time.sleep(self.sleep_period * 3)
 
 
    def get_oldest_trade(self):
