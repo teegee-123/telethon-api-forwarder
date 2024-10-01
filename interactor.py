@@ -82,8 +82,11 @@ class MaestroInteractor:
                   await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])
             # purge older than an hour
             elif(self.primary_trade["age"] >= 60 * 60):
+                  percent = self.primary_trade["percent"]
+                  age = self.primary_trade["age"]
+                  
                   await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({self.primary_trade["percent"]}%). Trade is {self.primary_trade["age"]} seconds old")
+                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
                   self.current_trades = self.get_trades_from_message(message_text)
                   time.sleep(self.sleep_period * 3)
                   self.current_trades = self.get_trades_from_message(message_text)
