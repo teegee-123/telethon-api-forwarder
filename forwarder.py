@@ -263,10 +263,11 @@ class TelegramManager:
 
    async def run(self, send_update = False):
       try:                  
-         print(f"enter code at {self.base_url}code?code=YOUR_CODE: ")
+         print(f"enter code at {self.base_url}code?code=")
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
-         await self.sheets.auth()
+         print("authing sheets")
+         await self.sheets.run()
          print("sheets authed")
          self.report_groups = self.sheets.read_reports()
          self.feeds = self.sheets.read_feeds()
