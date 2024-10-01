@@ -267,7 +267,7 @@ class TelegramManager:
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
          print("authing sheets")
-         await self.sheets.run()
+         await self.sheets.auth()
          print("sheets authed")
          self.report_groups = self.sheets.read_reports()
          self.feeds = self.sheets.read_feeds()
