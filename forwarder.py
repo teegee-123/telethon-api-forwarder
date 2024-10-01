@@ -37,7 +37,7 @@ class TelegramManager:
    feeds = []
    report_groups = []
    handlers = []
-   
+   base_url: str
    def __init__(self, client: TelegramClient):
       self.client = client
       self.sheets = Sheets()      
@@ -218,7 +218,7 @@ class TelegramManager:
    async def buy_signals_to_trade_bot_listener(self):
       # forward from buy signals group to trade bot
       @self.client.on(event=events.NewMessage(chats=[buy_signals_group['channel_id']]))
-      async def handler(event):         
+      async def handler(event: UpdateNewMessage):         
          print(event.message.message)
          if(event.message.message.lower().startswith("update")):
             print("updating feeds")
@@ -228,9 +228,6 @@ class TelegramManager:
             await self.client.send_message(buy_signals_group['channel_id'], str(self.interactor.current_trades))
          elif(event.message.message.lower().startswith("report")):    
             response_message = await self.report_generator.get_trade_report(event)
-            await self.client.send_message(buy_signals_group['channel_id'], response_message, parse_mode="Markdown")
-         elif(event.message.message.lower().startswith("details")):
-            response_message = await self.report_generator.get_detailed_report(event)
             await self.client.send_message(buy_signals_group['channel_id'], response_message, parse_mode="Markdown")
 
 
@@ -265,7 +262,8 @@ class TelegramManager:
       return code
 
    async def run(self, send_update = False):
-      try:
+      try:         
+         print(f"base_url {self.base_url}")
          print("enter code1: ")
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")

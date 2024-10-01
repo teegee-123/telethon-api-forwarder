@@ -42,24 +42,4 @@ class ReportHandler:
         response_message  += f'Won: **{won_trades}**\n'
         response_message  += f'Loss: **{loss_trades}**\n'
         return response_message
-                
-    
-    # async def get_detailed_report(self, event):
-    #     now = datetime.datetime.today()
-    #     date_from =  now - datetime.timedelta(hours=24) 
-    #     print(f"date_from {date_from}")
-    #     async for message in self.client.iter_messages(self.maestro_username, search='🧢 Market Cap'):
-    #         token_name = message.message.split("($")[1].split(")")[0].trim()
-    #         contract_address = message.message.split("CA: ")[1].split("\n")[0].trim()
-    #         buy_message_first_arrived = message.date
-    #         buy_market_cap = round(float(message.message.split("🧢 Market Cap | $")[1].split("\n")[0].replace(",", "")) , 2)
-    #         buy_age =  message.message.split("🔍 Age: ")[1].split("\n")[0]
 
-    #     async for message in self.client.iter_messages(self.maestro_username, search='✅ Buy'):
-    #         token_name_buying = message.message.split("💰 You gained")[1].split("\n")[0].split(" ")[-1]
-    #         token_buying_time = message.date
-
-    #     async for message in self.client.iter_messages(self.maestro_username, search='⚠️ Initiating auto'):
-    #         if
-    #         token_name_buying = message.message.split("💰 You gained")[1].split("\n")[0].split(" ")[-1]
-    #         token_buying_time = message.date

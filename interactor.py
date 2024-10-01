@@ -42,7 +42,7 @@ class MaestroInteractor:
             self.current_trades = []
          elif("Sell transaction of" in message.message.message):
             time.sleep(self.sleep_period)
-            await self.send_command(client, 'wallets')
+            await self.send_command(client, 'wallets')         
          elif(message.message.message.startswith("Public Commands:")):
             self.current_trades = []            
          # if(message.message.message is not None):         
@@ -64,9 +64,9 @@ class MaestroInteractor:
             self.primary_trade = self.current_trades[0]
             unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0 or x["last_read"] is None]
             trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
-            trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
+            # trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
             # trades read more than 150 seconds ago
-            most_stale_trades = [x for x in self.current_trades if x["last_read"] is not None and time.time() - x["last_read"] >= 150]
+            most_stale_trades = sorted(self.current_trades, key=lambda x: x["last_read"])
             # tell scraper bot how many open trades there are
             await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
             
@@ -81,17 +81,26 @@ class MaestroInteractor:
                else:
                   await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])
             # purge older than an hour
-            elif(len(trades_older_than_an_hour) > 0):
-               if(self.primary_trade["age"] >= 60 * 60):
-                  percent = self.primary_trade["percent"]
-                  age = self.primary_trade["age"]
-                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
+            elif(self.primary_trade["age"] >= 60 * 60):
                   await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                  time.sleep(self.sleep_period * 3)                  
-               else:
-                  await self.navigate_to_trade_at_index(trades_older_than_an_hour[0]["index"])
-            elif(len(most_stale_trades) > 0 ):
+                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({self.primary_trade["percent"]}%). Trade is {self.primary_trade["age"]} seconds old")
+                  self.current_trades = self.get_trades_from_message(message_text)
+                  time.sleep(self.sleep_period * 3)
+                  self.current_trades = self.get_trades_from_message(message_text)
+            # purge older than an hour
+            # elif(len(trades_older_than_an_hour) > 0):
+            #    if(self.primary_trade["age"] >= 60 * 60):
+            #       percent = self.primary_trade["percent"]
+            #       age = self.primary_trade["age"]
+            #       await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
+            #       await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
+                  
+            #       time.sleep(self.sleep_period * 3)
+            #    else:
+            #       await self.navigate_to_trade_at_index(trades_older_than_an_hour[0]["index"])
+            elif(len(most_stale_trades) > 0):
                await self.navigate_to_trade_at_index(most_stale_trades[0]["index"])
+               time.sleep(self.sleep_period)
 
          elif('%' in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             percent_button_text = [x['text'] for x in self.buttons if x['text']=='%']               

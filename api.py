@@ -1,6 +1,6 @@
 import os
 import asyncio 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient, events
 from forwarder import TelegramManager
@@ -33,8 +33,9 @@ def set_code_with_slash(code: str):
 
 
 @app.get("/")
-def run():     
-     asyncio.run(manager.run())     
+def run(request: Request):
+     manager.base_url = request.base_url
+     asyncio.run(manager.run())
      return "Started"
 
 
