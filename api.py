@@ -1,5 +1,6 @@
 import os
-import asyncio 
+import asyncio
+import time 
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient, events
@@ -38,7 +39,8 @@ async def run(request: Request):
      asyncio.get_running_loop().stop()
      asyncio.all_tasks(asyncio.get_running_loop()).__str__()
      asyncio.get_running_loop().stop()
-     
+     print("Waiting for tasks to complete")
+     time.sleep(5)
      manager.base_url = request.base_url
      asyncio.run(manager.run())
      return "Started"
