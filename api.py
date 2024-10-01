@@ -1,6 +1,5 @@
 import os
-import asyncio
-import time 
+import asyncio 
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient, events
@@ -33,15 +32,11 @@ def set_code_with_slash(code: str):
      return code
 
 
+
 @app.get("/")
-async def run(request: Request):
-     await client.disconnect()
-     asyncio.get_running_loop().stop()
-     asyncio.all_tasks(asyncio.get_running_loop()).__str__()
-     asyncio.get_running_loop().stop()
-     print("Waiting for tasks to complete")
-     time.sleep(5)
+def run(request: Request):
      manager.base_url = request.base_url
+     print(f"BASEURL {manager.base_url}")
      asyncio.run(manager.run())
      return "Started"
 
