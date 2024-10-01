@@ -150,6 +150,7 @@ class Sheets:
                     auth_url, _ = flow.authorization_url()
                     print(auth_url)
                     code = await self.getCodeFromFile()
+                    print(f"sheets code: {code}")
                     flow.fetch_token(code=code)
                     with open(token_file, "w") as token:
                         print(f'token written {flow.credentials.to_json()}')
