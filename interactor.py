@@ -66,7 +66,7 @@ class MaestroInteractor:
             trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
             # trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
             # trades read more than 150 seconds ago
-            most_stale_trades = sorted([x for x in self.current_trades if x["last_read"] != -999 and time.time() - x["last_read"] >= 90], key=lambda x: x["last_read"])
+            most_stale_trades = sorted([x for x in self.current_trades if x["last_read"] != -999 and time.time() - x["last_read"] >= 30], key=lambda x: x["last_read"])
             # tell scraper bot how many open trades there are
             await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
             
