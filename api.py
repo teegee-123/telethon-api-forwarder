@@ -1,10 +1,12 @@
 import os
-import asyncio 
+import asyncio
+import time 
 from fastapi import FastAPI, Request
 from dotenv import load_dotenv
 from telethon.sync import TelegramClient, events
 from forwarder import TelegramManager
 from sheets import Sheets
+import re
 load_dotenv()
 code_file = os.environ.get("CODE_FILE")
 session = os.environ.get("SESSION")
@@ -13,6 +15,13 @@ api_hash = os.environ.get("API_HASH")
 
 
 app = FastAPI()
+
+for filename in os.listdir():
+     if re.findall('session', filename):
+          os.remove(filename)
+          print(f"REMOVED {filename}")
+time.sleep(5)
+
 client = TelegramClient(session, api_id, api_hash)
 manager = TelegramManager(client)
 #from starlette.background import BackgroundTasks

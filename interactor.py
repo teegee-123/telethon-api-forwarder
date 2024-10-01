@@ -35,7 +35,7 @@ class MaestroInteractor:
          print(f"SHOWN: "+message.message.message.replace('\n', ""))
          if(message.message.message.startswith("You are setting the sell low limit.")):
             await client.send_message(entity=self.maestro_username, message=str(self.primary_trade["desired_stop_loss"]), reply_to=message.message.id)
-         elif(message.message.message.startswith("Reply to this message with your desired sell percentage")):
+         elif(message.message.message.startswith("Reply to this message with your desired sell percentage. Minimum is 1. Max is 100")):
             await client.send_message(entity=self.maestro_username, message="100", reply_to=message.message.id)
             percent = self.primary_trade["percent"]
             age = self.primary_trade["age"]
