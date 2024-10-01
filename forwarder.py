@@ -259,37 +259,34 @@ class TelegramManager:
 
    async def run(self, send_update = False):
       try:                  
-         print("authing sheets")
-         await self.sheets.auth()
          print(f"enter code at {self.base_url}code?code=")
          await self.client.start(phone=phone, code_callback=lambda : self.getCodeFromFile())
          print("client started")
+         print("authing sheets")
+         await self.sheets.auth()
          print("sheets authed")
          self.report_groups = self.sheets.read_reports()
          self.feeds = self.sheets.read_feeds()
       except Exception as error:
          await self.sheets.auth()
          print(f'error starting client {error}')
-      if(self.client.is_connected()):
-         async with self.client:
-            print("using new client")
-            if(self.interactor is not None):
-               self.interactor.__del__()
-            self.interactor =  MaestroInteractor(self.client, self.sheets)
-            
-            if(self.interval is not None):
-               self.interval.__del__()
-            self.interval = IntervalHandler( self.client, self.sheets)
-            
-            await self.create_buy_signals_group()
-            self.interactor.buy_signals_group_id = buy_signals_group["channel_id"]
-            if(send_update):
-               await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
-            await self.create_groups()
-            await self.start_listeners()
-            await self.client.run_until_disconnected()
-      else:
-         self.run()
+      async with self.client:
+         print("using new client")
+         if(self.interactor is not None):
+            self.interactor.__del__()
+         self.interactor =  MaestroInteractor(self.client, self.sheets)
+         
+         if(self.interval is not None):
+            self.interval.__del__()
+         self.interval = IntervalHandler( self.client, self.sheets)
+         
+         await self.create_buy_signals_group()
+         self.interactor.buy_signals_group_id = buy_signals_group["channel_id"]
+         if(send_update):
+            await self.client.send_message(buy_signals_group["channel_id"], f'update from api service')
+         await self.create_groups()
+         await self.start_listeners()
+         await self.client.run_until_disconnected()
 
 
 

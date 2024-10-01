@@ -33,13 +33,17 @@ def set_code_with_slash(code: str):
 
 
 
-@app.get("/")
+@app.get("/start")
 def run(request: Request):
      manager.base_url = request.base_url
      print(f"BASEURL {manager.base_url}")
      asyncio.run(manager.run())
      return "Started"
 
+@app.get('/')
+def auth_sheets():
+     asyncio.run(manager.sheets.auth())
+     return "Sheets authed"
 
 @app.get("/ping")
 def run():
