@@ -69,5 +69,5 @@ async def stop():
 
 @app.get("/send")
 async def send(): {
-     await manager.interactor.send_command(manager.client, 'hi')
+     await manager.interactor.send_command('hi')
 }

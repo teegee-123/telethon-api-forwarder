@@ -219,7 +219,7 @@ class TelegramManager:
          if(event.message.message.lower().startswith("update")):
             print("updating feeds")
             await self.check_for_new_feeds()
-            await self.interactor.send_command(self.client, 'monitor')
+            await self.interactor.send_command('monitor')
          elif(event.message.message.lower().startswith("trades")):
             await self.client.send_message(buy_signals_group['channel_id'], str(self.interactor.current_trades))
          elif(event.message.message.lower().startswith("report")):    

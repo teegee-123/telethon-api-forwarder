@@ -35,14 +35,20 @@ class MaestroInteractor:
          print(f"SHOWN: "+message.message.message.replace('\n', ""))
          if(message.message.message.startswith("You are setting the sell low limit.")):
             await client.send_message(entity=self.maestro_username, message=str(self.primary_trade["desired_stop_loss"]), reply_to=message.message.id)
+         elif(message.message.message.startswith("Reply to this message with your desired sell percentage")):
+            await client.send_message(entity=self.maestro_username, message="100", reply_to=message.message.id)
+            percent = self.primary_trade["percent"]
+            age = self.primary_trade["age"]
+            await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
+            await self.send_command('monitor')
          elif(message.message.message.startswith("📌 Primary Trade")):
             ## force an update
             await message.message.click(text="➡")
-         elif(message.message.message.startswith("❌ You do not have any active monitors!")):                        
+         elif(message.message.message.startswith("❌ You do not have any active monitors!")):
             self.current_trades = []
          elif("Sell transaction of" in message.message.message):
             time.sleep(self.sleep_period)
-            await self.send_command(client, 'wallets')         
+            await self.send_command('wallets')         
          elif(message.message.message.startswith("Public Commands:")):
             self.current_trades = []            
          # if(message.message.message is not None):         
@@ -81,15 +87,8 @@ class MaestroInteractor:
                else:
                   await self.navigate_to_trade_at_index(trades_with_outdated_stop_loss[0]["index"])
             # purge older than an hour
-            elif(self.primary_trade["age"] >= 60 * 60):
-                  percent = self.primary_trade["percent"]
-                  age = self.primary_trade["age"]
-                  
-                  await event.message.click(text=self.get_sell_all_button(self.buttons)["text"])
-                  await client.send_message(entity=self.maestro_username, message=f"⚠️ Initiating auto-sell. Time limit has been met ({percent}%). Trade is {age} seconds old")
-                  self.current_trades = self.get_trades_from_message(message_text)
-                  time.sleep(self.sleep_period * 3)
-                  self.current_trades = self.get_trades_from_message(message_text)
+            elif(self.primary_trade["age"] >= 60 * 60):                  
+                  await event.message.click(text=self.get_sell_xpercent_button(self.buttons)["text"])                  
             # purge older than an hour
             # elif(len(trades_older_than_an_hour) > 0):
             #    if(self.primary_trade["age"] >= 60 * 60):
@@ -114,7 +113,7 @@ class MaestroInteractor:
       self.handlers.append(handler)
       
       loop = asyncio.get_event_loop()
-      asyncio.run_coroutine_threadsafe(self.send_command(self.client, 'monitor'), loop)      
+      asyncio.run_coroutine_threadsafe(self.send_command('monitor'), loop)      
       
 
 
@@ -162,10 +161,10 @@ class MaestroInteractor:
       return total_seconds
 
    async def navigate_to_trade_at_index(self, index: int):
-      await self.send_command(self.client, index)      
+      await self.send_command(index)      
 
-   async def send_command(self, client: TelegramClient, command: str):
-      await client.send_message(self.maestro_username, f'/{command}')
+   async def send_command(self, command: str):
+      await self.client.send_message(self.maestro_username, f'/{command}')
 
    async def click_button_by_text(self, message, button_text):
       await message.click(text=button_text)
@@ -192,8 +191,8 @@ class MaestroInteractor:
    def get_right_nav_button(self, buttons):
       return buttons[self.try_get_button_index_by_text(buttons, '➡')]
 
-   def get_sell_all_button(self, buttons):
-      return buttons[self.try_get_button_index_by_text(buttons, '100%')]
+   def get_sell_xpercent_button(self, buttons):
+      return buttons[self.try_get_button_index_by_text(buttons, 'Sell X %')]
 
    def try_get_button_index_by_text(self, buttons, text):
       try:
