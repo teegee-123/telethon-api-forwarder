@@ -33,7 +33,12 @@ def set_code_with_slash(code: str):
 
 
 @app.get("/")
-def run(request: Request):
+async def run(request: Request):
+     await client.disconnect()
+     asyncio.get_running_loop().stop()
+     asyncio.all_tasks(asyncio.get_running_loop()).__str__()
+     asyncio.get_running_loop().stop()
+     
      manager.base_url = request.base_url
      asyncio.run(manager.run())
      return "Started"
