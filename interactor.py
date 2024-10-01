@@ -62,11 +62,11 @@ class MaestroInteractor:
          if('%' not in [x['text'] for x in self.buttons] and message_text.startswith("📌 Primary Trade")):
             self.current_trades = self.get_trades_from_message(message_text)            
             self.primary_trade = self.current_trades[0]
-            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0 or x["last_read"] is None]
+            unfilled_trades = [x for x in self.current_trades if x["read_stop_loss"] == -100 or x["age"] == 0 or x["last_read"] == -999]
             trades_with_outdated_stop_loss = [x for x in self.current_trades if x["read_stop_loss"] < x["desired_stop_loss"]]
             # trades_older_than_an_hour = [x for x in self.current_trades if x["age"] >= 60*60]
             # trades read more than 150 seconds ago
-            most_stale_trades = sorted(self.current_trades, key=lambda x: x["last_read"])
+            most_stale_trades = sorted([x for x in self.current_trades if x["last_read"] != -999], key=lambda x: x["last_read"])
             # tell scraper bot how many open trades there are
             await self.client.send_message('Pfscrapedevbot', f"/set {len(self.current_trades)}")
             
@@ -142,7 +142,7 @@ class MaestroInteractor:
          if(len(trade_item)):            
             return {"index": index, "name": name, "percent": percent, "age": trade_item[0]["age"], "read_stop_loss": trade_item[0]["read_stop_loss"], "desired_stop_loss": round(max(percent + self.trailing_stop, trade_item[0]["read_stop_loss"], self.trailing_stop) , 2), "last_read": trade_item[0]["last_read"] }
          else:
-            return {"index": index, "name": name, "percent": percent, "age": 0, "read_stop_loss": -100, "desired_stop_loss": round(max(percent + self.trailing_stop, self.trailing_stop), 2), "last_read": None }
+            return {"index": index, "name": name, "percent": percent, "age": 0, "read_stop_loss": -100, "desired_stop_loss": round(max(percent + self.trailing_stop, self.trailing_stop), 2), "last_read": -999 }
 
    def get_trades_from_message(self, message: str):
       return [self.read_trade_string(x, message) for x in re.findall("🪙*.*", message) if "🚀" in x]
