@@ -27,7 +27,6 @@ buy_signals_group = json.loads(os.environ.get("BUYSIGNALSGROUP"))
 report_group_name = os.environ.get("REPORT_GROUP_NAME")
 
 token_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS").replace('./', '')
-print(token_file)
 
 
 
